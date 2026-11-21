@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      analisis_merma: {
+        Row: {
+          categoria: string | null
+          condicion: string
+          confianza: string
+          created_at: string
+          descripcion: string
+          empresa_id: string
+          id: string
+          nombre_material: string
+          recomendaciones: string
+          ruta_foto: string
+          updated_at: string
+          usos_posibles: Json
+        }
+        Insert: {
+          categoria?: string | null
+          condicion: string
+          confianza: string
+          created_at?: string
+          descripcion: string
+          empresa_id: string
+          id?: string
+          nombre_material: string
+          recomendaciones: string
+          ruta_foto: string
+          updated_at?: string
+          usos_posibles?: Json
+        }
+        Update: {
+          categoria?: string | null
+          condicion?: string
+          confianza?: string
+          created_at?: string
+          descripcion?: string
+          empresa_id?: string
+          id?: string
+          nombre_material?: string
+          recomendaciones?: string
+          ruta_foto?: string
+          updated_at?: string
+          usos_posibles?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analisis_merma_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversaciones: {
         Row: {
           created_at: string

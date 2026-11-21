@@ -34,7 +34,13 @@ export type PanelItem = {
 
 /** Secciones del área privada. Cambia `disponible` a true cuando cada módulo esté construido. */
 export const PANEL_ITEMS: PanelItem[] = [
-  { to: "/panel", label: "Inicio", descripcion: "Resumen de tu cuenta", icon: Home, disponible: true },
+  {
+    to: "/panel",
+    label: "Inicio",
+    descripcion: "Resumen de tu cuenta",
+    icon: Home,
+    disponible: true,
+  },
   {
     to: "/panel/asistente",
     label: "Asistente",
@@ -47,7 +53,7 @@ export const PANEL_ITEMS: PanelItem[] = [
     label: "Analizar merma",
     descripcion: "Sube una foto y obtén una ficha sugerida del material.",
     icon: Camera,
-    disponible: false,
+    disponible: true,
   },
   {
     to: "/panel/publicar",

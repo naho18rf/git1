@@ -40,8 +40,13 @@
 - [x] El botón flotante se oculta mientras el pie de página está a la vista, para no tapar sus enlaces (probado en portada, mercado, contacto y pasaporte, en celular y escritorio)
 - [x] Pruebas: 66 pasan. Compilación y typecheck: sin errores
 
+## Hecho (iteración 7 — análisis con IA)
+- [x] Analizar merma con IA: foto → ficha sugerida editable, sin estimar precios
+- [x] Historial privado por empresa con fotos privadas y cambios guardados
+- [x] Flujo real probado con foto de textiles: análisis, edición y persistencia tras recargar
+- [x] Pruebas: 71 pasan
+
 ## Próximo
-- [ ] Analizar merma con IA (foto → ficha sugerida)
 - [ ] Verificación de empresas con SUNAT
 - [ ] Contrato en PDF
 - [ ] Panel de impacto por empresa
