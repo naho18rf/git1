@@ -8,6 +8,13 @@
       "when": 1795303058000,
       "tag": "0000_create_merma_analyses",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795303850026,
+      "tag": "0001_restaurar_registro_automatico_empresas",
+      "breakpoints": true
     }
   ]
 }
