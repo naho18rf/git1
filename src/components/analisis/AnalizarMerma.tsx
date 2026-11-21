@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, Check, ImagePlus, LoaderCircle, Sparkles } from "lucide-react";
+import { Camera, Check, ImagePlus, LoaderCircle, Sparkles, SwitchCamera, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,23 +50,27 @@ function borradorDe(analisis: Tables<"analisis_merma">): Borrador {
   };
 }
 
+async function comprimirOrigen(source: CanvasImageSource, width: number, height: number): Promise<Blob> {
+  const scale = Math.min(1, 1600 / Math.max(width, height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(height * scale);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("No pudimos preparar la foto.");
+  context.drawImage(source, 0, 0, canvas.width, canvas.height);
+  for (const quality of [0.8, 0.65, 0.5, 0.35]) {
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+    if (blob && blob.size <= MAX_BYTES_FOTO_ANALISIS) return blob;
+  }
+  throw new Error("La foto es demasiado grande. Prueba con otra imagen.");
+}
+
 async function comprimirFoto(file: File): Promise<Blob> {
   const image = await createImageBitmap(file);
   try {
-    const scale = Math.min(1, 1600 / Math.max(image.width, image.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(image.width * scale);
-    canvas.height = Math.round(image.height * scale);
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("No pudimos preparar la foto.");
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    for (const quality of [0.8, 0.65, 0.5, 0.35]) {
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/jpeg", quality),
-      );
-      if (blob && blob.size <= MAX_BYTES_FOTO_ANALISIS) return blob;
-    }
-    throw new Error("La foto es demasiado grande. Prueba con otra imagen.");
+    return await comprimirOrigen(image, image.width, image.height);
   } finally {
     image.close();
   }
@@ -74,6 +78,8 @@ async function comprimirFoto(file: File): Promise<Blob> {
 
 export function AnalizarMerma({ userId }: { userId: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const queryClient = useQueryClient();
   const {
     data: historial = [],
@@ -84,12 +90,27 @@ export function AnalizarMerma({ userId }: { userId: string }) {
   const save = useServerFn(actualizarFichaMerma);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [camaraActiva, setCamaraActiva] = useState(false);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const [actual, setActual] = useState<AnalisisConFoto | null>(null);
   const [borrador, setBorrador] = useState<Borrador | null>(null);
   const [ocupado, setOcupado] = useState<"analizando" | "guardando" | "foto" | null>(null);
   const [sucio, setSucio] = useState(false);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
+
+  function detenerCamara() {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCamaraActiva(false);
+  }
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   function cambiarPreview(url: string | null) {
     if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
@@ -100,12 +121,67 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     return !sucio || window.confirm("Tienes cambios sin guardar. ¿Quieres descartarlos?");
   }
 
+  async function abrirCamara(modo: "environment" | "user" = facingMode) {
+    if (!confirmarDescarte()) return;
+    setError("");
+    setMensaje("");
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Tu navegador no permite abrir la cámara directamente. Usa 'Subir archivo'.");
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      const media = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: modo }, width: { ideal: 1600 } },
+        audio: false,
+      });
+      streamRef.current = media;
+      setFacingMode(modo);
+      setCamaraActiva(true);
+      requestAnimationFrame(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = media;
+          void videoRef.current.play();
+        }
+      });
+    } catch (e) {
+      detenerCamara();
+      setError(
+        e instanceof Error && e.message.includes("navegador")
+          ? e.message
+          : "No pudimos acceder a la cámara. Revisa los permisos o usa el botón 'Subir archivo'.",
+      );
+    }
+  }
+
+  async function capturarDesdeCamara() {
+    const videoEl = videoRef.current;
+    if (!videoEl || videoEl.videoWidth === 0) return;
+    setError("");
+    setMensaje("");
+    setOcupado("foto");
+    try {
+      const blob = await comprimirOrigen(videoEl, videoEl.videoWidth, videoEl.videoHeight);
+      const preparado = new File([blob], "escaneo-merma.jpg", { type: "image/jpeg" });
+      detenerCamara();
+      cambiarPreview(URL.createObjectURL(blob));
+      setFile(preparado);
+      setActual(null);
+      setBorrador(null);
+      setSucio(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No pudimos capturar la imagen.");
+    } finally {
+      setOcupado(null);
+    }
+  }
+
   async function seleccionar(fileSeleccionado: File | undefined) {
     if (!fileSeleccionado) return;
     if (!confirmarDescarte()) {
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
+    detenerCamara();
     setError("");
     setMensaje("");
     setOcupado("foto");
@@ -194,6 +270,7 @@ export function AnalizarMerma({ userId }: { userId: string }) {
 
   function abrirAnalisis(analisis: AnalisisConFoto) {
     if (!confirmarDescarte()) return;
+    detenerCamara();
     setActual(analisis);
     setBorrador(borradorDe(analisis));
     setFile(null);
@@ -210,8 +287,8 @@ export function AnalizarMerma({ userId }: { userId: string }) {
         <p className="text-sm font-medium text-clay">Una foto como punto de partida</p>
         <h1 className="mt-2 text-title text-primary-deep">Analizar merma</h1>
         <p className="measure mt-4 text-lead text-muted-foreground">
-          Sube una foto y recibe una ficha sugerida del material. Puedes corregir cada dato antes de
-          usarlo.
+          Escanea el material con tu cámara o sube una foto y recibe una ficha sugerida. Puedes
+          corregir cada dato antes de usarlo.
         </p>
       </header>
 
@@ -220,8 +297,30 @@ export function AnalizarMerma({ userId }: { userId: string }) {
         aria-label="Nuevo análisis"
       >
         <div>
-          <div className="surface-card overflow-hidden">
-            {preview ? (
+          <div className="surface-card relative overflow-hidden">
+            {camaraActiva ? (
+              <div className="relative aspect-[4/3] w-full bg-black">
+                <video
+                  ref={videoRef}
+                  muted
+                  playsInline
+                  aria-label="Visor de escáner de material"
+                  className="h-full w-full object-cover"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-6 rounded-2xl border-2 border-dashed border-white/75"
+                />
+                <button
+                  type="button"
+                  onClick={() => void abrirCamara(facingMode === "environment" ? "user" : "environment")}
+                  aria-label="Cambiar cámara"
+                  className="absolute right-3 top-3 rounded-full bg-black/60 p-2.5 text-white backdrop-blur-sm transition hover:bg-black/80"
+                >
+                  <SwitchCamera className="h-5 w-5" />
+                </button>
+              </div>
+            ) : preview ? (
               <img
                 src={preview}
                 alt="Material seleccionado para analizar"
@@ -230,13 +329,13 @@ export function AnalizarMerma({ userId }: { userId: string }) {
             ) : (
               <div className="grid aspect-[4/3] place-items-center bg-pale-mint p-8 text-center">
                 <div>
-                  <ImagePlus
+                  <Camera
                     className="mx-auto h-9 w-9 text-primary"
                     strokeWidth={1.25}
                     aria-hidden="true"
                   />
                   <p className="mt-4 font-display text-2xl text-primary-deep">
-                    Fotografía un solo tipo de material
+                    Escanea un solo tipo de material
                   </p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     Con buena luz, de cerca y sin elementos que lo tapen.
@@ -245,35 +344,70 @@ export function AnalizarMerma({ userId }: { userId: string }) {
               </div>
             )}
           </div>
+
           <input
             ref={inputRef}
             id="foto-analisis"
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            capture="environment"
             className="sr-only"
             disabled={ocupado !== null}
-            onChange={(event) => void seleccionar(event.target.files?.[0])}
+            onChange={(event) => void seleccionar(event.target.files?.item(0) ?? undefined)}
           />
+
           <div className="mt-4 flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={ocupado !== null}
-              onClick={() => inputRef.current?.click()}
-            >
-              <Camera />
-              {preview ? "Elegir otra foto" : "Tomar o elegir foto"}
-            </Button>
-            <Button
-              type="button"
-              disabled={!file || ocupado !== null}
-              onClick={() => void analizar()}
-            >
-              {ocupado === "analizando" ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
-              {ocupado === "analizando" ? "Analizando foto…" : "Analizar material"}
-            </Button>
+            {camaraActiva ? (
+              <>
+                <Button
+                  type="button"
+                  disabled={ocupado !== null}
+                  onClick={() => void capturarDesdeCamara()}
+                >
+                  <Camera />
+                  Capturar material
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={ocupado !== null}
+                  onClick={detenerCamara}
+                >
+                  <X />
+                  Cerrar cámara
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={ocupado !== null}
+                  onClick={() => void abrirCamara()}
+                >
+                  <Camera />
+                  Escanear con cámara
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={ocupado !== null}
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <ImagePlus />
+                  Subir archivo
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!file || ocupado !== null}
+                  onClick={() => void analizar()}
+                >
+                  {ocupado === "analizando" ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+                  {ocupado === "analizando" ? "Analizando foto…" : "Analizar material"}
+                </Button>
+              </>
+            )}
           </div>
+
           <p className="mt-3 text-sm text-muted-foreground">
             JPG, PNG o WebP. La imagen se ajusta a un máximo de 1.5 MB.
           </p>
