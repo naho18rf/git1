@@ -6,9 +6,7 @@
 - [x] Área privada con panel, perfil editable y secciones "Próximamente"
 
 ## En curso
-- [ ] Corregir el ícono del logo y aplicar la nueva dirección visual con Fraunces y Manrope
-- [ ] Crear el flujo animado y la rosa interactiva de la portada
-- [ ] Revisar responsive, movimiento reducido, tests y compilación
+(nada abierto; lo de la iteración 1 quedó verificado más abajo)
 
 ## Hecho (iteración 2)
 - [x] Asistente de Remanente con IA: conversaciones múltiples guardadas por empresa, bienvenida y reglas de tono
@@ -33,6 +31,14 @@
 - [x] La compradora ahora ve los datos del lote en sus tratos
 - [x] Pruebas: entrega → completada / con problema, solo la compradora confirma, una constancia por trato, huella y verificación pública sin datos privados
 - [x] Flujo completo probado con dos empresas de prueba (solicitar → aceptar → entregar → confirmar → constancia → PDF → verificación); datos borrados
+
+## Hecho (iteración 6 — verificación del remix)
+- [x] Dirección visual confirmada: Fraunces y Manrope cargan desde la cabecera y se usan en el panel de estilos
+- [x] Flujo animado y pasos interactivos presentes en la portada
+- [x] Responsive revisado en 390 y 768: sin desbordes horizontales; con movimiento reducido la app se ve igual de completa
+- [x] El botón flotante del asistente ya no tapa el formulario de registro (se oculta en registro, ingreso, recuperación y cambio de clave)
+- [x] El botón flotante se oculta mientras el pie de página está a la vista, para no tapar sus enlaces (probado en portada, mercado, contacto y pasaporte, en celular y escritorio)
+- [x] Pruebas: 66 pasan. Compilación y typecheck: sin errores
 
 ## Próximo
 - [ ] Analizar merma con IA (foto → ficha sugerida)
