@@ -1,0 +1,293 @@
+/*
+ * Tailwind v4 entry: todos los tokens visuales viven aquí.
+ * Las fuentes remotas se cargan con <link> en src/routes/__root.tsx.
+ */
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-body);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-card: var(--radius-card-value);
+
+  --text-lead: 1rem;
+  --text-lead--line-height: 1.75;
+  --text-heading: 1.5625rem;
+  --text-heading--line-height: 1.1;
+  --text-title: 2.75rem;
+  --text-title--line-height: 1.05;
+  --text-display: 4.5rem;
+  --text-display--line-height: 1;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  --color-mint: var(--mint);
+  --color-pale-mint: var(--pale-mint);
+  --color-rose: var(--rose);
+  --color-rose-soft: var(--rose-soft);
+  --color-rose-pale: var(--rose-pale);
+  --color-gold: var(--gold);
+  --color-clay: var(--clay);
+  --color-ivory: var(--ivory);
+  --color-surface: var(--surface);
+  --color-deep: var(--primary-deep);
+  --color-deep-foreground: var(--deep-foreground);
+  --color-deep-muted: var(--deep-muted);
+  --color-night: var(--night);
+  --color-hero-foreground: var(--night);
+  --color-step-line: var(--step-line);
+  --color-indicator: var(--indicator-green);
+  --color-paper: var(--paper);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-soft: var(--shadow-soft-value);
+  --shadow-paper: var(--shadow-paper-value);
+}
+
+:root {
+  --radius: 0.5rem;
+  --radius-card-value: 8px;
+
+  /* Paleta aprobada */
+  --primary-deep: oklch(0.3066 0.0535 169.55);
+  --forest: oklch(0.4246 0.0808 164.87);
+  --mint: oklch(0.9353 0.0241 163.13);
+  --pale-mint: oklch(0.9563 0.0109 167.8);
+  --ivory: oklch(0.9778 0.0079 73.74);
+  --surface: oklch(1 0 0);
+  --rose: oklch(0.8311 0.0735 27.09);
+  --rose-soft: oklch(0.8148 0.0619 28.51);
+  --rose-pale: oklch(0.9121 0.0261 29.42);
+  --gold: oklch(0.722 0.0601 45.64);
+  --clay: oklch(0.5162 0.068 38.1);
+  --ink: oklch(0.3066 0.0535 169.55);
+  --ink-soft: oklch(0.4973 0.0393 170.03);
+  --line: oklch(0.904 0.018 64.9);
+  --step-line: oklch(0.8777 0.0237 165.78);
+  --night: oklch(0.2495 0.0425 171.72);
+  --deep-foreground: var(--ivory);
+  --deep-muted: oklch(0.9353 0.0241 163.13 / 0.82);
+  --paper: oklch(0.988 0.007 75);
+
+  /* Colores de la ilustración botánica */
+  --leaf-green: oklch(0.628 0.1128 167.73);
+  --leaf-vein: oklch(0.473 0.0877 165.85);
+  --textile-line: oklch(0.7133 0.0821 27.89);
+  --wood-vein: oklch(0.5828 0.0642 43.83);
+  --brushed-line: oklch(0.83 0.0217 79.08);
+  --petal-line: oklch(0.8469 0.0356 33.28);
+  --petal-deep: oklch(0.7224 0.0918 27.15);
+  --indicator-green: oklch(0.4755 0.0818 169.75);
+
+  /* shadcn */
+  --background: var(--ivory);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--forest);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: var(--rose-pale);
+  --secondary-foreground: var(--clay);
+  --muted: var(--pale-mint);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--forest);
+  --destructive: oklch(0.5 0.17 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--forest);
+
+  --chart-1: var(--forest);
+  --chart-2: var(--gold);
+  --chart-3: var(--clay);
+  --chart-4: var(--primary-deep);
+  --chart-5: var(--rose);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--forest);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--mint);
+  --sidebar-accent-foreground: var(--forest);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--forest);
+
+  --gradient-hero: radial-gradient(
+    110% 95% at 80% 68%,
+    oklch(0.4777 0.0903 169.93) 0%,
+    oklch(0.3664 0.0671 171.03) 40%,
+    var(--night) 100%
+  );
+  --gradient-step: radial-gradient(
+    100% 90% at 50% 55%,
+    oklch(0.4777 0.0903 169.93) 0%,
+    oklch(0.3664 0.0671 171.03) 45%,
+    var(--night) 100%
+  );
+  --shadow-soft-value: 0 1px 2px oklch(0.3066 0.0535 169.55 / 0.05);
+  --shadow-paper-value: 0 1px 0 var(--line), 0 22px 40px -30px oklch(0.3066 0.0535 169.55 / 0.28);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-serif {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--mint);
+    color: var(--primary-deep);
+  }
+}
+
+@utility surface-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card-value);
+}
+
+@utility measure {
+  max-width: 68ch;
+}
+
+@utility select-chevron {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position:
+    calc(100% - 21px) 52%,
+    calc(100% - 16px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+@utility hero-surface {
+  background: var(--gradient-hero);
+}
+
+@utility step-panel {
+  background: var(--gradient-step);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes step-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@utility step-fill {
+  transform-origin: left center;
+  animation: step-fill 4.6s linear both;
+}
+
+@utility petal-grow {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

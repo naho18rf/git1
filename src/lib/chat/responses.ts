@@ -1,0 +1,57 @@
+import { createOpenAI } from "@ai-sdk/openai";
+import { streamText, type ModelMessage, type UIMessage } from "ai";
+
+import {
+  createLovableAiGatewayRunIdFetch,
+  getLovableAiGatewayRunId,
+  withLovableAiGatewayRunIdHeader,
+} from "./run-id.ts";
+
+export function createResponsesCall(
+  request: Request,
+  config: { baseURL: string; apiKey: string; model: string },
+  messages: ModelMessage[],
+  instructions?: string,
+) {
+  const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
+  const provider = createOpenAI({
+    baseURL: `${config.baseURL.replace(/\/+$/, "").replace(/\/v1$/, "")}/v1`,
+    apiKey: config.apiKey,
+    headers: { "Lovable-API-Key": config.apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
+    fetch: runIdFetch.fetch,
+  });
+  const result = streamText({
+    model: provider.responses(config.model),
+    ...(instructions ? { instructions } : {}),
+    messages,
+    abortSignal: request.signal,
+    providerOptions: {
+      openai: {
+        store: false,
+        forceReasoning: true,
+        reasoningEffort: "low",
+        reasoningSummary: "auto",
+        include: ["reasoning.encrypted_content"],
+      },
+    },
+  });
+  return {
+    result,
+    response: (options: {
+      originalMessages: UIMessage[];
+      onFinish?: (event: { responseMessage: UIMessage }) => void | Promise<void>;
+    }) =>
+      withLovableAiGatewayRunIdHeader(
+        result.toUIMessageStreamResponse({
+          originalMessages: options.originalMessages,
+          sendReasoning: true,
+          ...(options.onFinish ? { onFinish: options.onFinish } : {}),
+          onError: (error) => {
+            console.error("[chat] error del modelo", error);
+            return "No pudimos responder en este momento. Inténtalo de nuevo.";
+          },
+        }),
+        runIdFetch,
+      ),
+  };
+}
