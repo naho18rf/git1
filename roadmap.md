@@ -9,7 +9,7 @@
 ## En curso
 
 - [x] Corregir el guardado de la empresa al registrarse y probar que sus datos persisten al cambiar de sección
-- [ ] Mejorar solo el análisis de merma: categorías existentes, salida fija, incertidumbre, avisos de manejo y hasta 3 fotos; sin cambiar diseño, flujo ni historial
+- [x] Mejorar solo el análisis de merma: categorías existentes, salida fija, incertidumbre, avisos de manejo y hasta 3 fotos; sin cambiar diseño, flujo ni historial
 - [ ] Revisar el correo disponible y agregar avisos de tratos sin duplicados; si falta configuración externa, usar aviso visible y contador sin cambiar el contacto ni el flujo actual
 
 ## Hecho (iteración 2)

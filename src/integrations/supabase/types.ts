@@ -76,6 +76,54 @@ export type Database = {
           },
         ]
       }
+      avisos_tratos: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          id: string
+          leido_at: string | null
+          mensaje: string
+          operacion_id: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          id?: string
+          leido_at?: string | null
+          mensaje: string
+          operacion_id: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          leido_at?: string | null
+          mensaje?: string
+          operacion_id?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avisos_tratos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avisos_tratos_operacion_id_fkey"
+            columns: ["operacion_id"]
+            isOneToOne: false
+            referencedRelation: "operaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversaciones: {
         Row: {
           created_at: string
