@@ -17,6 +17,8 @@ interface PuntoSimbiosis {
   tipo: string;
   lat: number;
   lng: number;
+  left: string;
+  top: string;
 }
 
 const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
@@ -27,6 +29,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Planta de valorización orgánica",
     lat: -12.0464,
     lng: -77.1181,
+    left: "34%",
+    top: "48%",
   },
   {
     id: 2,
@@ -35,6 +39,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Centro de acopio y compostaje",
     lat: -12.0268,
     lng: -76.9242,
+    left: "68%",
+    top: "44%",
   },
   {
     id: 3,
@@ -43,6 +49,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Procesamiento de subproductos",
     lat: -12.2133,
     lng: -76.9422,
+    left: "64%",
+    top: "78%",
   },
   {
     id: 4,
@@ -51,6 +59,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Nodo de recuperación agrícola",
     lat: -11.8692,
     lng: -77.0325,
+    left: "45%",
+    top: "22%",
   },
 ];
 
@@ -135,23 +145,20 @@ export function MapaSimbiosis() {
 
         {/* Visor de mapa */}
         <div className="surface-card relative h-96 overflow-hidden bg-[#dfe8e2] p-0 select-none lg:col-span-2">
-          {/* Mapa vectorial base de respaldo (si el entorno bloquea imágenes externas) */}
+          {/* Mapa vectorial base de Lima y Callao */}
           <svg
             viewBox="0 0 600 400"
             className="absolute inset-0 h-full w-full opacity-60"
             preserveAspectRatio="xMidYMid slice"
           >
             <rect width="600" height="400" fill="#e8efe9" />
-            {/* Océano Pacífico (costa oeste de Lima/Callao) */}
             <path d="M0,0 L160,0 L195,180 L250,400 L0,400 Z" fill="#cbe0eb" />
-            {/* Ejes viales principales (Panamericana, Ramiro Prialé, Faucett) */}
             <g stroke="#ffffff" strokeWidth="5" fill="none">
               <path d="M180,0 L290,400" />
               <path d="M150,160 L600,130" />
               <path d="M165,210 L580,260" />
               <path d="M140,90 L480,40" />
             </g>
-            {/* Cuadrícula urbana */}
             <g stroke="#d3dfd7" strokeWidth="1.5" fill="none">
               <path d="M220,0 L340,400" />
               <path d="M280,0 L410,400" />
@@ -184,9 +191,12 @@ export function MapaSimbiosis() {
             )}
           </div>
 
-          {/* Pin central del nodo activo */}
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <div className="mb-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-primary-deep shadow-md ring-1 ring-black/10">
+          {/* Pin dinámico del nodo activo */}
+          <div
+            style={{ left: puntoActivo.left, top: puntoActivo.top }}
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300"
+          >
+            <div className="mb-1 whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-primary-deep shadow-md ring-1 ring-black/10">
               {puntoActivo.nombre}
             </div>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white shadow-lg ring-4 ring-white">
