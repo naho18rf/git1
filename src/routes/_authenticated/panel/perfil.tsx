@@ -19,14 +19,21 @@ export const Route = createFileRoute("/_authenticated/panel/perfil")({
   component: PerfilPage,
 });
 
-function PerfilPage() {
+export function PerfilPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const { data: empresa, isLoading, isError } = useQuery(empresaQuery(user.id));
 
   const form = useForm<PerfilValues>({
     resolver: zodResolver(perfilSchema),
-    defaultValues: { nombre_empresa: "", ruc: "", representante: "", telefono: "", distrito: "", direccion: "" },
+    defaultValues: {
+      nombre_empresa: "",
+      ruc: "",
+      representante: "",
+      telefono: "",
+      distrito: "",
+      direccion: "",
+    },
   });
   const { errors, isSubmitting, isDirty } = form.formState;
 
@@ -44,36 +51,64 @@ function PerfilPage() {
   }, [empresa, form]);
 
   const onSubmit = form.handleSubmit(async (v) => {
-    const { error } = await supabase
+    const { data: actualizada, error } = await supabase
       .from("empresas")
       .update({ ...v, telefono: normalizePeruPhone(v.telefono) })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select("id")
+      .maybeSingle();
     if (error) {
       toast.error("No pudimos guardar los cambios. Inténtalo de nuevo.");
+      return;
+    }
+    if (!actualizada) {
+      toast.error(
+        "No encontramos el registro de tu empresa. Recarga la página antes de intentar de nuevo.",
+      );
       return;
     }
     await queryClient.invalidateQueries({ queryKey: ["empresa", user.id] });
     toast.success("Datos de la empresa actualizados");
   });
 
-  const reg = (name: keyof PerfilValues) => ({ id: name, "aria-invalid": !!errors[name], ...form.register(name) });
+  const reg = (name: keyof PerfilValues) => ({
+    id: name,
+    "aria-invalid": !!errors[name],
+    ...form.register(name),
+  });
 
   return (
     <div>
       <h1 className="text-title text-primary-deep">Datos de tu empresa</h1>
-      <p className="measure mt-3 text-[17px] text-muted-foreground">Solo tu empresa puede ver y editar esta información.</p>
+      <p className="measure mt-3 text-[17px] text-muted-foreground">
+        Solo tu empresa puede ver y editar esta información.
+      </p>
 
       {isLoading ? (
         <p className="mt-10 flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Cargando…
         </p>
-      ) : isError ? (
-        <p className="mt-10 rounded-md border border-destructive/40 bg-surface px-4 py-3 text-sm text-destructive" role="alert">
-          No pudimos cargar tus datos. Recarga la página.
+      ) : isError || !empresa ? (
+        <p
+          className="mt-10 rounded-md border border-destructive/40 bg-surface px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {isError
+            ? "No pudimos cargar tus datos. Recarga la página."
+            : "No encontramos el registro de tu empresa. Recarga la página; si el problema continúa, contáctanos."}
         </p>
       ) : (
-        <form onSubmit={onSubmit} noValidate className="surface-card mt-10 grid gap-5 p-7 sm:grid-cols-2 md:p-10">
-          <Field id="nombre_empresa" label="Nombre de la empresa" error={errors.nombre_empresa?.message} className="sm:col-span-2">
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="surface-card mt-10 grid gap-5 p-7 sm:grid-cols-2 md:p-10"
+        >
+          <Field
+            id="nombre_empresa"
+            label="Nombre de la empresa"
+            error={errors.nombre_empresa?.message}
+            className="sm:col-span-2"
+          >
             <Input {...reg("nombre_empresa")} />
           </Field>
           <Field id="ruc" label="RUC" error={errors.ruc?.message} hint="11 dígitos">
@@ -93,12 +128,16 @@ function PerfilPage() {
               <option value="">Elige un distrito</option>
               <optgroup label="Lima Metropolitana">
                 {DISTRITOS_LIMA.map((d) => (
-                  <option key={d} value={d}>{d}</option>
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
                 ))}
               </optgroup>
               <optgroup label="Callao">
                 {DISTRITOS_CALLAO.map((d) => (
-                  <option key={d} value={d}>{d}</option>
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
                 ))}
               </optgroup>
             </select>

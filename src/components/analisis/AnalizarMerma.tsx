@@ -12,7 +12,9 @@ import { analisisMermaQuery } from "@/lib/analisis-merma";
 import { analizarMerma, actualizarFichaMerma } from "@/lib/analisis-merma.functions";
 import {
   MAX_BYTES_FOTO_ANALISIS,
+  MAX_FOTOS_ANALISIS,
   actualizarFichaSchema,
+  cantidadFotosValida,
   fichaMermaSchema,
 } from "@/lib/analisis-merma-reglas";
 import { fechaLima } from "@/lib/lotes";
@@ -20,7 +22,10 @@ import { MATERIALES_PERMITIDOS, nombreCategoria } from "@/lib/materiales";
 
 const selectClass = "mt-2 h-11 w-full rounded-md border border-input bg-surface px-3 text-sm";
 
-type AnalisisConFoto = Tables<"analisis_merma"> & { foto_url: string | null };
+type AnalisisConFoto = Tables<"analisis_merma"> & {
+  foto_url: string | null;
+  fotos_urls: string[];
+};
 type Borrador = {
   nombre_material: string;
   categoria: string;
@@ -28,6 +33,8 @@ type Borrador = {
   condicion: string;
   usosTexto: string;
   recomendaciones: string;
+  noSePuedeSaber: string;
+  avisoTexto: string;
 };
 
 function borradorDe(analisis: Tables<"analisis_merma">): Borrador {
@@ -39,6 +46,8 @@ function borradorDe(analisis: Tables<"analisis_merma">): Borrador {
     usos_posibles: analisis.usos_posibles,
     recomendaciones: analisis.recomendaciones,
     confianza: analisis.confianza,
+    no_se_puede_saber: analisis.no_se_puede_saber,
+    aviso_manejo: analisis.aviso_manejo,
   });
   return {
     nombre_material: ficha.nombre_material,
@@ -47,10 +56,16 @@ function borradorDe(analisis: Tables<"analisis_merma">): Borrador {
     condicion: ficha.condicion,
     usosTexto: ficha.usos_posibles.join("\n"),
     recomendaciones: ficha.recomendaciones,
+    noSePuedeSaber: ficha.no_se_puede_saber,
+    avisoTexto: ficha.aviso_manejo ?? "",
   };
 }
 
-async function comprimirOrigen(source: CanvasImageSource, width: number, height: number): Promise<Blob> {
+async function comprimirOrigen(
+  source: CanvasImageSource,
+  width: number,
+  height: number,
+): Promise<Blob> {
   const scale = Math.min(1, 1600 / Math.max(width, height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(width * scale);
@@ -88,8 +103,8 @@ export function AnalizarMerma({ userId }: { userId: string }) {
   } = useQuery(analisisMermaQuery(userId));
   const analyze = useServerFn(analizarMerma);
   const save = useServerFn(actualizarFichaMerma);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [camaraActiva, setCamaraActiva] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const [actual, setActual] = useState<AnalisisConFoto | null>(null);
@@ -112,9 +127,11 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     };
   }, []);
 
-  function cambiarPreview(url: string | null) {
-    if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
-    setPreview(url);
+  function cambiarPreviews(urls: string[]) {
+    previews.forEach((url) => {
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    setPreviews(urls);
   }
 
   function confirmarDescarte(): boolean {
@@ -127,7 +144,9 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     setMensaje("");
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Tu navegador no permite abrir la cámara directamente. Usa 'Subir archivo'.");
+        throw new Error(
+          "Tu navegador no permite abrir la cámara directamente. Usa 'Subir archivo'.",
+        );
       }
       streamRef.current?.getTracks().forEach((track) => track.stop());
       const media = await navigator.mediaDevices.getUserMedia({
@@ -163,8 +182,8 @@ export function AnalizarMerma({ userId }: { userId: string }) {
       const blob = await comprimirOrigen(videoEl, videoEl.videoWidth, videoEl.videoHeight);
       const preparado = new File([blob], "escaneo-merma.jpg", { type: "image/jpeg" });
       detenerCamara();
-      cambiarPreview(URL.createObjectURL(blob));
-      setFile(preparado);
+      cambiarPreviews([URL.createObjectURL(blob)]);
+      setFiles([preparado]);
       setActual(null);
       setBorrador(null);
       setSucio(false);
@@ -175,9 +194,15 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     }
   }
 
-  async function seleccionar(fileSeleccionado: File | undefined) {
-    if (!fileSeleccionado) return;
+  async function seleccionar(seleccionados: FileList | null) {
+    const elegidos = Array.from(seleccionados ?? []);
+    if (elegidos.length === 0) return;
     if (!confirmarDescarte()) {
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    if (!cantidadFotosValida(elegidos.length)) {
+      setError(`Selecciona entre 1 y ${MAX_FOTOS_ANALISIS} fotos del mismo residuo.`);
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
@@ -186,18 +211,25 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     setMensaje("");
     setOcupado("foto");
     try {
-      if (!["image/jpeg", "image/png", "image/webp"].includes(fileSeleccionado.type)) {
-        throw new Error("Usa una imagen JPG, PNG o WebP.");
-      }
-      const blob = await comprimirFoto(fileSeleccionado);
-      const preparado = new File([blob], "merma.jpg", { type: "image/jpeg" });
-      cambiarPreview(URL.createObjectURL(blob));
-      setFile(preparado);
+      const preparados = await Promise.all(
+        elegidos.map(async (elegido, indice) => {
+          if (!["image/jpeg", "image/png", "image/webp"].includes(elegido.type)) {
+            throw new Error("Usa imágenes JPG, PNG o WebP.");
+          }
+          const blob = await comprimirFoto(elegido);
+          return {
+            blob,
+            file: new File([blob], `merma-${indice + 1}.jpg`, { type: "image/jpeg" }),
+          };
+        }),
+      );
+      cambiarPreviews(preparados.map((preparado) => URL.createObjectURL(preparado.blob)));
+      setFiles(preparados.map((preparado) => preparado.file));
       setActual(null);
       setBorrador(null);
       setSucio(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No pudimos preparar la foto.");
+      setError(e instanceof Error ? e.message : "No pudimos preparar las fotos.");
     } finally {
       setOcupado(null);
       if (inputRef.current) inputRef.current.value = "";
@@ -205,22 +237,22 @@ export function AnalizarMerma({ userId }: { userId: string }) {
   }
 
   async function analizar() {
-    if (!file) return;
+    if (files.length === 0) return;
     setError("");
     setMensaje("");
     setOcupado("analizando");
     try {
       const data = new FormData();
-      data.append("foto", file);
+      files.forEach((file) => data.append("fotos", file));
       const resultado = await analyze({ data });
       setActual(resultado);
       setBorrador(borradorDe(resultado));
-      setFile(null);
+      setFiles([]);
       setSucio(false);
       setMensaje("La sugerencia está lista y se guardó en tu historial. Revísala antes de usarla.");
       await queryClient.invalidateQueries({ queryKey: ["analisis-merma", userId] });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No pudimos analizar la foto.");
+      setError(e instanceof Error ? e.message : "No pudimos analizar las fotos.");
     } finally {
       setOcupado(null);
     }
@@ -248,6 +280,8 @@ export function AnalizarMerma({ userId }: { userId: string }) {
         .map((uso) => uso.trim())
         .filter(Boolean),
       recomendaciones: borrador.recomendaciones,
+      no_se_puede_saber: borrador.noSePuedeSaber,
+      aviso_manejo: borrador.avisoTexto.trim() || null,
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Revisa la ficha.");
@@ -256,7 +290,11 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     setOcupado("guardando");
     try {
       const actualizado = await save({ data: parsed.data });
-      setActual({ ...actualizado, foto_url: actual.foto_url });
+      setActual({
+        ...actualizado,
+        foto_url: actual.foto_url,
+        fotos_urls: actual.fotos_urls,
+      });
       setBorrador(borradorDe(actualizado));
       setSucio(false);
       setMensaje("Cambios guardados.");
@@ -273,8 +311,14 @@ export function AnalizarMerma({ userId }: { userId: string }) {
     detenerCamara();
     setActual(analisis);
     setBorrador(borradorDe(analisis));
-    setFile(null);
-    cambiarPreview(analisis.foto_url);
+    setFiles([]);
+    cambiarPreviews(
+      analisis.fotos_urls.length > 0
+        ? analisis.fotos_urls
+        : analisis.foto_url
+          ? [analisis.foto_url]
+          : [],
+    );
     setSucio(false);
     setError("");
     setMensaje("");
@@ -284,11 +328,11 @@ export function AnalizarMerma({ userId }: { userId: string }) {
   return (
     <div className="space-y-12">
       <header>
-        <p className="text-sm font-medium text-clay">Una foto como punto de partida</p>
+        <p className="text-sm font-medium text-clay">Hasta 3 fotos como punto de partida</p>
         <h1 className="mt-2 text-title text-primary-deep">Analizar merma</h1>
         <p className="measure mt-4 text-lead text-muted-foreground">
-          Escanea el material con tu cámara o sube una foto y recibe una ficha sugerida. Puedes
-          corregir cada dato antes de usarlo.
+          Escanea el material con tu cámara o sube hasta 3 fotos del mismo residuo y recibe una
+          ficha sugerida. Puedes corregir cada dato antes de usarlo.
         </p>
       </header>
 
@@ -313,19 +357,26 @@ export function AnalizarMerma({ userId }: { userId: string }) {
                 />
                 <button
                   type="button"
-                  onClick={() => void abrirCamara(facingMode === "environment" ? "user" : "environment")}
+                  onClick={() =>
+                    void abrirCamara(facingMode === "environment" ? "user" : "environment")
+                  }
                   aria-label="Cambiar cámara"
                   className="absolute right-3 top-3 rounded-full bg-black/60 p-2.5 text-white backdrop-blur-sm transition hover:bg-black/80"
                 >
                   <SwitchCamera className="h-5 w-5" />
                 </button>
               </div>
-            ) : preview ? (
-              <img
-                src={preview}
-                alt="Material seleccionado para analizar"
-                className="aspect-[4/3] w-full object-cover"
-              />
+            ) : previews.length > 0 ? (
+              <div className={previews.length > 1 ? "grid grid-cols-3 gap-1" : ""}>
+                {previews.map((url, indice) => (
+                  <img
+                    key={url}
+                    src={url}
+                    alt={`Material seleccionado, foto ${indice + 1} de ${previews.length}`}
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                ))}
+              </div>
             ) : (
               <div className="grid aspect-[4/3] place-items-center bg-pale-mint p-8 text-center">
                 <div>
@@ -350,9 +401,10 @@ export function AnalizarMerma({ userId }: { userId: string }) {
             id="foto-analisis"
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            multiple
             className="sr-only"
             disabled={ocupado !== null}
-            onChange={(event) => void seleccionar(event.target.files?.item(0) ?? undefined)}
+            onChange={(event) => void seleccionar(event.target.files)}
           />
 
           <div className="mt-4 flex flex-wrap gap-3">
@@ -394,26 +446,31 @@ export function AnalizarMerma({ userId }: { userId: string }) {
                   onClick={() => inputRef.current?.click()}
                 >
                   <ImagePlus />
-                  Subir archivo
+                  Subir fotos
                 </Button>
                 <Button
                   type="button"
-                  disabled={!file || ocupado !== null}
+                  disabled={files.length === 0 || ocupado !== null}
                   onClick={() => void analizar()}
                 >
-                  {ocupado === "analizando" ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
-                  {ocupado === "analizando" ? "Analizando foto…" : "Analizar material"}
+                  {ocupado === "analizando" ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    <Sparkles />
+                  )}
+                  {ocupado === "analizando" ? "Analizando fotos…" : "Analizar material"}
                 </Button>
               </>
             )}
           </div>
 
           <p className="mt-3 text-sm text-muted-foreground">
-            JPG, PNG o WebP. La imagen se ajusta a un máximo de 1.5 MB.
+            JPG, PNG o WebP. Hasta 3 fotos del mismo residuo; cada una se ajusta a un máximo de 1.5
+            MB.
           </p>
           <div aria-live="polite">
             {ocupado === "foto" && (
-              <p className="mt-4 text-sm text-muted-foreground">Preparando la foto…</p>
+              <p className="mt-4 text-sm text-muted-foreground">Preparando las fotos…</p>
             )}
             {ocupado === "analizando" && (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -490,7 +547,7 @@ export function AnalizarMerma({ userId }: { userId: string }) {
                 </div>
                 <div>
                   <label htmlFor="condicion-analisis" className="text-sm font-medium">
-                    Condición visible
+                    Estado visible
                   </label>
                   <Textarea
                     id="condicion-analisis"
@@ -519,7 +576,7 @@ export function AnalizarMerma({ userId }: { userId: string }) {
                 </div>
                 <div>
                   <label htmlFor="recomendaciones-analisis" className="text-sm font-medium">
-                    Recomendaciones
+                    Recomendaciones de manejo y almacenamiento
                   </label>
                   <Textarea
                     id="recomendaciones-analisis"
@@ -530,10 +587,42 @@ export function AnalizarMerma({ userId }: { userId: string }) {
                     className="mt-2 min-h-28"
                   />
                 </div>
+                <div>
+                  <label htmlFor="limitaciones-analisis" className="text-sm font-medium">
+                    Qué no se puede saber desde la foto
+                  </label>
+                  <Textarea
+                    id="limitaciones-analisis"
+                    required
+                    maxLength={1000}
+                    value={borrador.noSePuedeSaber}
+                    onChange={(e) => editar("noSePuedeSaber", e.target.value)}
+                    className="mt-2 min-h-24"
+                  />
+                </div>
+                {borrador.avisoTexto && (
+                  <div className="rounded-md border border-destructive/40 p-4">
+                    <label
+                      htmlFor="aviso-analisis"
+                      className="text-sm font-medium text-destructive"
+                    >
+                      Aviso de manejo y validación antes de publicar
+                    </label>
+                    <Textarea
+                      id="aviso-analisis"
+                      required
+                      maxLength={700}
+                      value={borrador.avisoTexto}
+                      onChange={(e) => editar("avisoTexto", e.target.value)}
+                      className="mt-2 min-h-24"
+                    />
+                  </div>
+                )}
               </div>
               <p className="mt-5 border-l-2 border-clay pl-4 text-sm text-muted-foreground">
-                La IA puede equivocarse. Una foto no confirma composición, limpieza, seguridad ni
-                procedencia; verifica el material en planta.
+                Esta ficha es una sugerencia de la IA que debes revisar y editar. Las fotos no
+                confirman composición, limpieza, seguridad ni procedencia; verifica el material en
+                planta antes de publicarlo.
               </p>
               <Button type="submit" className="mt-6" disabled={!sucio || ocupado !== null}>
                 {ocupado === "guardando" ? <LoaderCircle className="animate-spin" /> : <Check />}

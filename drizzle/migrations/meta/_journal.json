@@ -15,6 +15,13 @@
       "when": 1795303850026,
       "tag": "0001_restaurar_registro_automatico_empresas",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795305942440,
+      "tag": "0002_mejorar_ficha_analisis_merma",
+      "breakpoints": true
     }
   ]
 }

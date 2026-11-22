@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       analisis_merma: {
         Row: {
+          aviso_manejo: string | null
           categoria: string | null
           condicion: string
           confianza: string
@@ -23,13 +24,16 @@ export type Database = {
           descripcion: string
           empresa_id: string
           id: string
+          no_se_puede_saber: string
           nombre_material: string
           recomendaciones: string
           ruta_foto: string
+          rutas_fotos: Json
           updated_at: string
           usos_posibles: Json
         }
         Insert: {
+          aviso_manejo?: string | null
           categoria?: string | null
           condicion: string
           confianza: string
@@ -37,13 +41,16 @@ export type Database = {
           descripcion: string
           empresa_id: string
           id?: string
+          no_se_puede_saber?: string
           nombre_material: string
           recomendaciones: string
           ruta_foto: string
+          rutas_fotos?: Json
           updated_at?: string
           usos_posibles?: Json
         }
         Update: {
+          aviso_manejo?: string | null
           categoria?: string | null
           condicion?: string
           confianza?: string
@@ -51,9 +58,11 @@ export type Database = {
           descripcion?: string
           empresa_id?: string
           id?: string
+          no_se_puede_saber?: string
           nombre_material?: string
           recomendaciones?: string
           ruta_foto?: string
+          rutas_fotos?: Json
           updated_at?: string
           usos_posibles?: Json
         }

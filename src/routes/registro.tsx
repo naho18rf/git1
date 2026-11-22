@@ -33,7 +33,7 @@ export const Route = createFileRoute("/registro")({
   component: RegistroPage,
 });
 
-function RegistroPage() {
+export function RegistroPage() {
   const navigate = useNavigate();
   const { session, ready } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +91,8 @@ function RegistroPage() {
         <div className="rounded-lg border border-primary/20 bg-mint p-7 md:p-8">
           <MailCheck className="h-6 w-6 text-primary" strokeWidth={1.25} aria-hidden="true" />
           <p className="mt-4 text-primary-deep">
-            Enviamos un enlace de confirmación a <strong className="font-medium">{enviadoA}</strong>.
+            Enviamos un enlace de confirmación a <strong className="font-medium">{enviadoA}</strong>
+            .
           </p>
           <p className="mt-2 text-sm text-foreground">
             Ábrelo para activar la cuenta de tu empresa. Si no lo ves en unos minutos, revisa la
@@ -121,16 +122,30 @@ function RegistroPage() {
       <form onSubmit={onSubmit} className="space-y-10" noValidate>
         <fieldset className="grid gap-5 sm:grid-cols-2">
           <legend className="mb-5 font-display text-heading text-primary-deep">Empresa</legend>
-          <Field id="nombre_empresa" label="Nombre de la empresa" error={errors.nombre_empresa?.message} className="sm:col-span-2">
+          <Field
+            id="nombre_empresa"
+            label="Nombre de la empresa"
+            error={errors.nombre_empresa?.message}
+            className="sm:col-span-2"
+          >
             <Input autoComplete="organization" {...reg("nombre_empresa")} />
           </Field>
           <Field id="ruc" label="RUC" error={errors.ruc?.message} hint="11 dígitos">
             <Input inputMode="numeric" maxLength={11} {...reg("ruc")} />
           </Field>
-          <Field id="representante" label="Nombre del representante" error={errors.representante?.message}>
+          <Field
+            id="representante"
+            label="Nombre del representante"
+            error={errors.representante?.message}
+          >
             <Input autoComplete="name" {...reg("representante")} />
           </Field>
-          <Field id="telefono" label="Teléfono / WhatsApp" error={errors.telefono?.message} hint="Ej.: 987 654 321">
+          <Field
+            id="telefono"
+            label="Teléfono / WhatsApp"
+            error={errors.telefono?.message}
+            hint="Ej.: 987 654 321"
+          >
             <Input type="tel" inputMode="tel" autoComplete="tel" {...reg("telefono")} />
           </Field>
           <Field id="distrito" label="Distrito" error={errors.distrito?.message}>
@@ -152,7 +167,12 @@ function RegistroPage() {
               </optgroup>
             </select>
           </Field>
-          <Field id="direccion" label="Dirección" error={errors.direccion?.message} className="sm:col-span-2">
+          <Field
+            id="direccion"
+            label="Dirección"
+            error={errors.direccion?.message}
+            className="sm:col-span-2"
+          >
             <Input autoComplete="street-address" {...reg("direccion")} />
           </Field>
         </fieldset>
@@ -161,13 +181,27 @@ function RegistroPage() {
 
         <fieldset className="grid gap-5 sm:grid-cols-2">
           <legend className="mb-5 font-display text-heading text-primary-deep">Acceso</legend>
-          <Field id="correo" label="Correo" error={errors.correo?.message} className="sm:col-span-2">
+          <Field
+            id="correo"
+            label="Correo"
+            error={errors.correo?.message}
+            className="sm:col-span-2"
+          >
             <Input type="email" autoComplete="email" {...reg("correo")} />
           </Field>
-          <Field id="password" label="Contraseña" error={errors.password?.message} hint="Mínimo 8 caracteres">
+          <Field
+            id="password"
+            label="Contraseña"
+            error={errors.password?.message}
+            hint="Mínimo 8 caracteres"
+          >
             <Input type="password" autoComplete="new-password" {...reg("password")} />
           </Field>
-          <Field id="confirmacion" label="Confirmar contraseña" error={errors.confirmacion?.message}>
+          <Field
+            id="confirmacion"
+            label="Confirmar contraseña"
+            error={errors.confirmacion?.message}
+          >
             <Input type="password" autoComplete="new-password" {...reg("confirmacion")} />
           </Field>
         </fieldset>
@@ -187,13 +221,24 @@ function RegistroPage() {
                 />
               )}
             />
-            <label htmlFor="acepta_terminos" className="text-sm leading-relaxed text-muted-foreground">
+            <label
+              htmlFor="acepta_terminos"
+              className="text-sm leading-relaxed text-muted-foreground"
+            >
               Acepto los{" "}
-              <Link to="/terminos" target="_blank" className="text-primary underline-offset-4 hover:underline">
+              <Link
+                to="/terminos"
+                target="_blank"
+                className="text-primary underline-offset-4 hover:underline"
+              >
                 términos y condiciones
               </Link>{" "}
               y la{" "}
-              <Link to="/privacidad" target="_blank" className="text-primary underline-offset-4 hover:underline">
+              <Link
+                to="/privacidad"
+                target="_blank"
+                className="text-primary underline-offset-4 hover:underline"
+              >
                 política de privacidad
               </Link>
               .
@@ -215,7 +260,10 @@ function RegistroPage() {
         <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:justify-between">
           <p className="text-sm text-muted-foreground">
             ¿Ya tienes cuenta?{" "}
-            <Link to="/auth" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              to="/auth"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Ingresar
             </Link>
           </p>

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   MAX_BYTES_FOTO_ANALISIS,
+  MAX_FOTOS_ANALISIS,
+  cantidadFotosValida,
   fichaMermaSchema,
   firmaImagenValida,
   tipoImagenValido,
@@ -13,8 +15,11 @@ const ficha = {
   descripcion: "Recortes textiles de distintos tamaños y colores visibles.",
   condicion: "Se observan piezas secas; la limpieza debe verificarse en planta.",
   usos_posibles: ["Relleno textil", "Piezas pequeñas de confección"],
-  recomendaciones: "Separar por composición y retirar elementos ajenos antes de reutilizar.",
+  recomendaciones: "Separar por composición y almacenar seco y cubierto antes de reutilizar.",
   confianza: "media",
+  no_se_puede_saber:
+    "Las fotos no confirman composición exacta, contaminación, peso ni peligrosidad.",
+  aviso_manejo: null,
 } as const;
 
 describe("ficha sugerida de merma", () => {
@@ -23,7 +28,7 @@ describe("ficha sugerida de merma", () => {
     expect(
       fichaMermaSchema.safeParse({
         ...ficha,
-        usos_posibles: ["Uso 1", "Uso 2", "Uso 3", "Uso 4", "Uso 5"],
+        usos_posibles: ["Relleno", "Confección", "Aislamiento", "Tapizado", "Manualidades"],
       }).success,
     ).toBe(true);
   });
@@ -36,17 +41,45 @@ describe("ficha sugerida de merma", () => {
 
   it("rechaza más de cinco usos para mantener la ficha concreta", () => {
     expect(
-      fichaMermaSchema.safeParse({ ...ficha, usos_posibles: ["a", "b", "c", "d", "e", "f"] })
-        .success,
+      fichaMermaSchema.safeParse({
+        ...ficha,
+        usos_posibles: [
+          "Relleno",
+          "Confección",
+          "Aislamiento",
+          "Tapizado",
+          "Manualidades",
+          "Reciclaje",
+        ],
+      }).success,
     ).toBe(false);
+  });
+
+  it("exige las limitaciones de la foto y permite un aviso de manejo especializado", () => {
+    const { no_se_puede_saber: _omitido, ...sinLimitaciones } = ficha;
+    expect(fichaMermaSchema.safeParse(sinLimitaciones).success).toBe(false);
+    expect(
+      fichaMermaSchema.parse({
+        ...ficha,
+        aviso_manejo: "Requiere manejo especializado y validación antes de publicar.",
+      }).aviso_manejo,
+    ).toContain("validación antes de publicar");
   });
 });
 
-describe("foto del análisis", () => {
+describe("fotos del análisis", () => {
   it("mantiene el límite de 1.5 MB aproximadamente y los formatos JPG, PNG y WebP", () => {
     expect(MAX_BYTES_FOTO_ANALISIS).toBe(1_600_000);
     expect(["image/jpeg", "image/png", "image/webp"].every(tipoImagenValido)).toBe(true);
     expect(tipoImagenValido("image/gif")).toBe(false);
+  });
+
+  it("permite entre una y tres fotos del mismo residuo", () => {
+    expect(MAX_FOTOS_ANALISIS).toBe(3);
+    expect(cantidadFotosValida(0)).toBe(false);
+    expect(cantidadFotosValida(1)).toBe(true);
+    expect(cantidadFotosValida(3)).toBe(true);
+    expect(cantidadFotosValida(4)).toBe(false);
   });
 
   it("comprueba la firma del archivo y no solo su extensión", () => {
