@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ComingSoon } from "@/components/panel/ComingSoon";
+import { MapaSimbiosis } from "@/components/mapa/MapaSimbiosis";
 
 export const Route = createFileRoute("/_authenticated/panel/mapa")({
   head: () => ({ meta: [{ title: "Mapa · Remanente" }] }),
-  component: () => <ComingSoon path="/panel/mapa" />,
+  component: MapaSimbiosis,
 });

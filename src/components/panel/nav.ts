@@ -88,7 +88,7 @@ export const PANEL_ITEMS: PanelItem[] = [
     label: "Mapa",
     descripcion: "Mapa de simbiosis industrial en Lima y Callao.",
     icon: Map,
-    disponible: false,
+    disponible: true,
   },
   {
     to: "/panel/perfil",
