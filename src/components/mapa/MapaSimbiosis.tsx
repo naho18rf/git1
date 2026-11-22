@@ -54,7 +54,6 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
   },
 ];
 
-// Convierte latitud/longitud a coordenadas de tesela (tile) estándar de mapas web
 function latLngToTile(lat: number, lng: number, zoom: number) {
   const n = Math.pow(2, zoom);
   const x = Math.floor(((lng + 180) / 360) * n);
@@ -134,8 +133,34 @@ export function MapaSimbiosis() {
           </div>
         </div>
 
-        {/* Visor de mapa por teselas (sin iframes bloqueados) */}
-        <div className="surface-card relative h-96 overflow-hidden bg-[#e5ebe7] p-0 select-none lg:col-span-2">
+        {/* Visor de mapa */}
+        <div className="surface-card relative h-96 overflow-hidden bg-[#dfe8e2] p-0 select-none lg:col-span-2">
+          {/* Mapa vectorial base de respaldo (si el entorno bloquea imágenes externas) */}
+          <svg
+            viewBox="0 0 600 400"
+            className="absolute inset-0 h-full w-full opacity-60"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <rect width="600" height="400" fill="#e8efe9" />
+            {/* Océano Pacífico (costa oeste de Lima/Callao) */}
+            <path d="M0,0 L160,0 L195,180 L250,400 L0,400 Z" fill="#cbe0eb" />
+            {/* Ejes viales principales (Panamericana, Ramiro Prialé, Faucett) */}
+            <g stroke="#ffffff" strokeWidth="5" fill="none">
+              <path d="M180,0 L290,400" />
+              <path d="M150,160 L600,130" />
+              <path d="M165,210 L580,260" />
+              <path d="M140,90 L480,40" />
+            </g>
+            {/* Cuadrícula urbana */}
+            <g stroke="#d3dfd7" strokeWidth="1.5" fill="none">
+              <path d="M220,0 L340,400" />
+              <path d="M280,0 L410,400" />
+              <path d="M350,0 L490,400" />
+              <path d="M160,110 L600,85" />
+              <path d="M185,280 L600,320" />
+            </g>
+          </svg>
+
           {/* Cuadrícula 3x3 de calles reales */}
           <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
             {offsets.map((dy) =>
@@ -145,8 +170,12 @@ export function MapaSimbiosis() {
                 return (
                   <img
                     key={`${zoom}-${tileX}-${tileY}`}
-                    src={`https://cartocdn.com{zoom}/${tileX}/${tileY}.png`}
+                    src={`https://openstreetmap.org{zoom}/${tileX}/${tileY}.png`}
                     alt=""
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
                     className="h-full w-full object-cover"
                     draggable={false}
                   />
