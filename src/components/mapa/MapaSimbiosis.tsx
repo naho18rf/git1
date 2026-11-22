@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, MapPin, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, ExternalLink, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PuntoSimbiosis {
@@ -10,6 +10,9 @@ interface PuntoSimbiosis {
   tipo: string;
   lat: number;
   lng: number;
+  // Posición porcentual en el mapa esquemático de Lima y Callao
+  posX: string;
+  posY: string;
 }
 
 const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
@@ -20,6 +23,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Planta de valorización orgánica",
     lat: -12.0464,
     lng: -77.1181,
+    posX: "28%",
+    posY: "52%",
   },
   {
     id: 2,
@@ -28,6 +33,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Centro de acopio y compostaje",
     lat: -12.0268,
     lng: -76.9242,
+    posX: "68%",
+    posY: "48%",
   },
   {
     id: 3,
@@ -36,6 +43,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Procesamiento de subproductos",
     lat: -12.2133,
     lng: -76.9422,
+    posX: "62%",
+    posY: "82%",
   },
   {
     id: 4,
@@ -44,6 +53,8 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Nodo de recuperación agrícola",
     lat: -11.8692,
     lng: -77.0325,
+    posX: "44%",
+    posY: "20%",
   },
 ];
 
@@ -52,7 +63,6 @@ export function MapaSimbiosis() {
     PUNTOS_SIMBIOSIS[0]
   );
 
-  // Calcula el recuadro (bbox) alrededor de la coordenada seleccionada
   const delta = 0.025;
   const bbox = `${puntoActivo.lng - delta},${puntoActivo.lat - delta},${
     puntoActivo.lng + delta
@@ -60,6 +70,7 @@ export function MapaSimbiosis() {
 
   const mapUrl = `https://openstreetmap.org{bbox}&layer=mapnik&marker=${puntoActivo.lat},${puntoActivo.lng}`;
   const googleMapsUrl = `https://google.com{puntoActivo.lat},${puntoActivo.lng}`;
+  const googleDirectionsUrl = `https://google.com{puntoActivo.lat},${puntoActivo.lng}`;
 
   return (
     <div>
@@ -97,21 +108,34 @@ export function MapaSimbiosis() {
             );
           })}
 
-          <Button variant="outline" size="sm" className="mt-2 w-full" asChild>
-            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-              Abrir ubicación en Google Maps
-              <ExternalLink className="ml-2 h-3.5 w-3.5" />
-            </a>
-          </Button>
+          <div className="mt-2 flex flex-col gap-2">
+            <Button variant="default" size="sm" className="w-full" asChild>
+              <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                Ver en Google Maps
+                <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              </a>
+            </Button>
+
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <a
+                href={googleDirectionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Cómo llegar (GPS)
+                <Navigation className="ml-2 h-3.5 w-3.5" />
+              </a>
+            </Button>
+          </div>
         </div>
 
-        {/* Visor de mapa interactivo con pin exacto */}
-        <div className="surface-card overflow-hidden p-0 lg:col-span-2">
+        {/* Visor de mapa */}
+        <div className="surface-card relative h-[420px] overflow-hidden bg-[#eef3ef] p-0 lg:col-span-2">
           <iframe
+            key={puntoActivo.id}
             title={`Mapa - ${puntoActivo.nombre}`}
             src={mapUrl}
-            className="h-[420px] w-full border-0"
-            loading="lazy"
+            className="h-full w-full border-0"
           />
         </div>
       </div>
