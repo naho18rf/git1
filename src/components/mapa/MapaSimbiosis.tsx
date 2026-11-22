@@ -10,9 +10,6 @@ interface PuntoSimbiosis {
   tipo: string;
   lat: number;
   lng: number;
-  // Posición porcentual en el mapa esquemático de Lima y Callao
-  posX: string;
-  posY: string;
 }
 
 const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
@@ -23,8 +20,6 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Planta de valorización orgánica",
     lat: -12.0464,
     lng: -77.1181,
-    posX: "28%",
-    posY: "52%",
   },
   {
     id: 2,
@@ -33,8 +28,6 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Centro de acopio y compostaje",
     lat: -12.0268,
     lng: -76.9242,
-    posX: "68%",
-    posY: "48%",
   },
   {
     id: 3,
@@ -43,8 +36,6 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Procesamiento de subproductos",
     lat: -12.2133,
     lng: -76.9422,
-    posX: "62%",
-    posY: "82%",
   },
   {
     id: 4,
@@ -53,14 +44,12 @@ const PUNTOS_SIMBIOSIS: PuntoSimbiosis[] = [
     tipo: "Nodo de recuperación agrícola",
     lat: -11.8692,
     lng: -77.0325,
-    posX: "44%",
-    posY: "20%",
   },
 ];
 
 export function MapaSimbiosis() {
   const [puntoActivo, setPuntoActivo] = useState<PuntoSimbiosis>(
-    PUNTOS_SIMBIOSIS[0]
+    () => PUNTOS_SIMBIOSIS.at(0)!
   );
 
   const delta = 0.025;
@@ -82,7 +71,6 @@ export function MapaSimbiosis() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Lista de nodos interactivos */}
         <div className="flex flex-col gap-3">
           {PUNTOS_SIMBIOSIS.map((punto) => {
             const seleccionado = punto.id === puntoActivo.id;
@@ -129,8 +117,7 @@ export function MapaSimbiosis() {
           </div>
         </div>
 
-        {/* Visor de mapa */}
-        <div className="surface-card relative h-[420px] overflow-hidden bg-[#eef3ef] p-0 lg:col-span-2">
+        <div className="surface-card relative h-96 overflow-hidden bg-[#eef3ef] p-0 lg:col-span-2">
           <iframe
             key={puntoActivo.id}
             title={`Mapa - ${puntoActivo.nombre}`}
