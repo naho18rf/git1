@@ -6,9 +6,9 @@ import { Logo } from "@/components/brand/Logo";
 import { PANEL_ITEMS } from "@/components/panel/nav";
 import { Button } from "@/components/ui/button";
 import { useSignOut } from "@/lib/auth";
+import { avisosTratosQuery, contarNovedadesTratos } from "@/lib/avisos";
 import { empresaQuery } from "@/lib/empresa";
 import { misTratosQuery } from "@/lib/tratos";
-import { contarPendientes } from "@/lib/tratos-reglas";
 
 export const Route = createFileRoute("/_authenticated/panel")({
   head: () => ({
@@ -30,12 +30,16 @@ function PanelLayout() {
   const { data: empresa } = useQuery(empresaQuery(user.id));
   const signOut = useSignOut();
   const { data: tratos = [] } = useQuery(misTratosQuery(user.id));
-  const pendientes = contarPendientes(tratos);
+  const { data: avisos = [] } = useQuery(avisosTratosQuery(user.id));
+  const pendientes = contarNovedadesTratos(tratos, avisos);
   const badge = (to: string, className: string) =>
     to === "/panel/tratos" && pendientes > 0 ? (
       <span className={className}>
         {pendientes}
-        <span className="sr-only"> {pendientes === 1 ? "trato espera tu respuesta" : "tratos esperan tu respuesta"}</span>
+        <span className="sr-only">
+          {" "}
+          {pendientes === 1 ? "novedad en Mis tratos" : "novedades en Mis tratos"}
+        </span>
       </span>
     ) : null;
 
@@ -61,10 +65,11 @@ function PanelLayout() {
               >
                 <item.icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 <span className="flex-1">{item.label}</span>
-                {badge(item.to, "grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground")}
-                {!item.disponible && (
-                  <span className="text-xs text-muted-foreground">Pronto</span>
+                {badge(
+                  item.to,
+                  "grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground",
                 )}
+                {!item.disponible && <span className="text-xs text-muted-foreground">Pronto</span>}
               </Link>
             ))}
           </nav>
@@ -92,7 +97,10 @@ function PanelLayout() {
             >
               <item.icon className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
               {item.label}
-              {badge(item.to, "grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-medium text-primary-foreground")}
+              {badge(
+                item.to,
+                "grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-medium text-primary-foreground",
+              )}
             </Link>
           ))}
         </nav>

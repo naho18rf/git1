@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, Handshake } from "lucide-react";
+import { AlertTriangle, Bell, Handshake } from "lucide-react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccionesTrato } from "@/components/tratos/AccionesTrato";
+import { avisosTratosQuery, marcarAvisosLeidos } from "@/lib/avisos";
 import { fechaLima } from "@/lib/lotes";
 import { nombreCategoria } from "@/lib/materiales";
 import { misTratosQuery, type Trato } from "@/lib/tratos";
@@ -17,23 +19,82 @@ export const Route = createFileRoute("/_authenticated/panel/tratos")({
 
 function TratosPage() {
   const { user } = Route.useRouteContext();
+  const queryClient = useQueryClient();
   const { data = [], isLoading, error } = useQuery(misTratosQuery(user.id));
+  const { data: avisos = [] } = useQuery(avisosTratosQuery(user.id));
   const compras = data.filter((t) => t.rol === "compradora");
   const ventas = data.filter((t) => t.rol === "vendedora");
   const pend = (l: Trato[]) => contarPendientes(l);
 
+  useEffect(() => {
+    const ids = avisos.filter((aviso) => !aviso.leido_at).map((aviso) => aviso.id);
+    if (ids.length === 0) return undefined;
+    let activo = true;
+    void marcarAvisosLeidos(user.id, ids)
+      .then(() => {
+        if (activo) void queryClient.invalidateQueries({ queryKey: ["avisos-tratos", user.id] });
+      })
+      .catch((error: unknown) => {
+        console.error("No se pudieron marcar los avisos como leídos", error);
+      });
+    return () => {
+      activo = false;
+    };
+  }, [avisos, queryClient, user.id]);
+
   return (
     <div>
       <h1 className="text-title text-primary-deep">Mis tratos</h1>
-      <p className="measure mt-4 text-muted-foreground">Sigue tus solicitudes y entregas. Los datos de contacto se comparten solo cuando el trato se acepta.</p>
-      {isLoading ? <p className="mt-8 text-muted-foreground">Cargando tus tratos…</p> : error ? <p role="alert" className="mt-8 text-destructive">No pudimos cargar tus tratos.</p> : (
-        <Tabs defaultValue={pend(ventas) > pend(compras) ? "vendedora" : "compradora"} className="mt-8">
+      <p className="measure mt-4 text-muted-foreground">
+        Sigue tus solicitudes y entregas. Los datos de contacto se comparten solo cuando el trato se
+        acepta.
+      </p>
+      {avisos.length > 0 && (
+        <section className="surface-card mt-8 p-5 md:p-6" aria-labelledby="titulo-avisos-tratos">
+          <div className="flex items-center gap-3">
+            <Bell className="h-5 w-5 text-primary" strokeWidth={1.5} aria-hidden="true" />
+            <h2 id="titulo-avisos-tratos" className="font-display text-2xl text-primary-deep">
+              Avisos de tus tratos
+            </h2>
+          </div>
+          <ul className="mt-4 divide-y divide-border">
+            {avisos.slice(0, 5).map((aviso) => (
+              <li key={aviso.id} className="py-3 first:pt-0 last:pb-0">
+                <p className="font-medium text-primary-deep">{aviso.titulo}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{aviso.mensaje}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {fechaLima(aviso.created_at)} (Lima)
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {isLoading ? (
+        <p className="mt-8 text-muted-foreground">Cargando tus tratos…</p>
+      ) : error ? (
+        <p role="alert" className="mt-8 text-destructive">
+          No pudimos cargar tus tratos.
+        </p>
+      ) : (
+        <Tabs
+          defaultValue={pend(ventas) > pend(compras) ? "vendedora" : "compradora"}
+          className="mt-8"
+        >
           <TabsList>
-            <TabsTrigger value="compradora">Como compradora{pend(compras) ? ` (${pend(compras)})` : ""}</TabsTrigger>
-            <TabsTrigger value="vendedora">Como vendedora{pend(ventas) ? ` (${pend(ventas)})` : ""}</TabsTrigger>
+            <TabsTrigger value="compradora">
+              Como compradora{pend(compras) ? ` (${pend(compras)})` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="vendedora">
+              Como vendedora{pend(ventas) ? ` (${pend(ventas)})` : ""}
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="compradora"><Lista tratos={compras} rol="compradora" /></TabsContent>
-          <TabsContent value="vendedora"><Lista tratos={ventas} rol="vendedora" /></TabsContent>
+          <TabsContent value="compradora">
+            <Lista tratos={compras} rol="compradora" />
+          </TabsContent>
+          <TabsContent value="vendedora">
+            <Lista tratos={ventas} rol="vendedora" />
+          </TabsContent>
         </Tabs>
       )}
     </div>
@@ -45,9 +106,19 @@ function Lista({ tratos, rol }: { tratos: Trato[]; rol: "compradora" | "vendedor
     return (
       <div className="surface-card mt-6 flex flex-col items-start gap-4 p-8">
         <Handshake className="h-6 w-6 text-clay" strokeWidth={1.5} aria-hidden="true" />
-        <h2 className="font-display text-2xl text-primary-deep">{rol === "compradora" ? "Aún no has solicitado lotes" : "Aún no tienes solicitudes"}</h2>
-        <p className="measure text-muted-foreground">{rol === "compradora" ? "Explora el mercado y solicita lo que le sirva a tu planta." : "Cuando otra empresa solicite uno de tus lotes, aparecerá aquí."}</p>
-        <Button asChild variant="outline"><Link to={rol === "compradora" ? "/panel/mercado" : "/panel/publicar"}>{rol === "compradora" ? "Ir al mercado" : "Publicar un lote"}</Link></Button>
+        <h2 className="font-display text-2xl text-primary-deep">
+          {rol === "compradora" ? "Aún no has solicitado lotes" : "Aún no tienes solicitudes"}
+        </h2>
+        <p className="measure text-muted-foreground">
+          {rol === "compradora"
+            ? "Explora el mercado y solicita lo que le sirva a tu planta."
+            : "Cuando otra empresa solicite uno de tus lotes, aparecerá aquí."}
+        </p>
+        <Button asChild variant="outline">
+          <Link to={rol === "compradora" ? "/panel/mercado" : "/panel/publicar"}>
+            {rol === "compradora" ? "Ir al mercado" : "Publicar un lote"}
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -57,33 +128,83 @@ function Lista({ tratos, rol }: { tratos: Trato[]; rol: "compradora" | "vendedor
         <li key={t.id} className="surface-card p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[13px] tracking-[0.16em] text-clay uppercase">{t.lote ? nombreCategoria(t.lote.categoria) : "Lote"}</p>
-              <p className="mt-1 font-display text-xl text-primary-deep">
-                {t.lote ? <Link to="/lote/$codigo" params={{ codigo: t.lote.codigo }} className="underline-offset-4 hover:underline">{t.lote.codigo}</Link> : "—"} · {t.lote?.peso_kg} kg aprox.
+              <p className="text-[13px] tracking-[0.16em] text-clay uppercase">
+                {t.lote ? nombreCategoria(t.lote.categoria) : "Lote"}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{rol === "compradora" ? "Vende" : "Solicita"}: {t.otra.nombre_empresa ?? "Empresa"} · {fechaLima(t.created_at)} (Lima)</p>
+              <p className="mt-1 font-display text-xl text-primary-deep">
+                {t.lote ? (
+                  <Link
+                    to="/lote/$codigo"
+                    params={{ codigo: t.lote.codigo }}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {t.lote.codigo}
+                  </Link>
+                ) : (
+                  "—"
+                )}{" "}
+                · {t.lote?.peso_kg} kg aprox.
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {rol === "compradora" ? "Vende" : "Solicita"}: {t.otra.nombre_empresa ?? "Empresa"}{" "}
+                · {fechaLima(t.created_at)} (Lima)
+              </p>
             </div>
-            <span className="rounded-full border border-border bg-mint px-3 py-1 text-sm">{ESTADO_TRATO_LABEL[t.estado]}</span>
+            <span className="rounded-full border border-border bg-mint px-3 py-1 text-sm">
+              {ESTADO_TRATO_LABEL[t.estado]}
+            </span>
           </div>
           {(t.mensaje || t.recogida) && (
-            <p className="mt-3 text-sm"><span className="text-muted-foreground">Recojo:</span> {t.recogida}{t.mensaje ? <><br /><span className="text-muted-foreground">Mensaje:</span> {t.mensaje}</> : null}</p>
+            <p className="mt-3 text-sm">
+              <span className="text-muted-foreground">Recojo:</span> {t.recogida}
+              {t.mensaje ? (
+                <>
+                  <br />
+                  <span className="text-muted-foreground">Mensaje:</span> {t.mensaje}
+                </>
+              ) : null}
+            </p>
           )}
           {t.otra.contacto && (
             <dl className="mt-4 grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-3">
-              <div><dt className="text-muted-foreground">Representante</dt><dd>{t.otra.representante ?? "—"}</dd></div>
-              <div><dt className="text-muted-foreground">Teléfono</dt><dd>{t.otra.telefono ?? "—"}</dd></div>
-              <div><dt className="text-muted-foreground">Correo</dt><dd className="break-all">{t.otra.correo ?? "—"}</dd></div>
+              <div>
+                <dt className="text-muted-foreground">Representante</dt>
+                <dd>{t.otra.representante ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Teléfono</dt>
+                <dd>{t.otra.telefono ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Correo</dt>
+                <dd className="break-all">{t.otra.correo ?? "—"}</dd>
+              </div>
             </dl>
           )}
-          {t.entregada_at && <p className="mt-3 text-sm text-muted-foreground">Entregado: {fechaLima(t.entregada_at)} (Lima)</p>}
-          {t.estado === "con_problema" && (
-            <p role="status" className="mt-4 flex gap-2 rounded-md border border-destructive/40 p-3 text-sm">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
-              La empresa compradora reportó un problema con la entrega. El equipo de Remanente lo revisará.{t.problema_detalle ? ` Detalle: ${t.problema_detalle}` : ""}
+          {t.entregada_at && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Entregado: {fechaLima(t.entregada_at)} (Lima)
             </p>
           )}
-          {t.constancia && <p className="mt-3 text-sm">Constancia <strong>{t.constancia.numero}</strong> · {fechaLima(t.constancia.emitida_at)} (Lima)</p>}
-          <div className="mt-4"><AccionesTrato trato={t} /></div>
+          {t.estado === "con_problema" && (
+            <p
+              role="status"
+              className="mt-4 flex gap-2 rounded-md border border-destructive/40 p-3 text-sm"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+              La empresa compradora reportó un problema con la entrega. El equipo de Remanente lo
+              revisará.{t.problema_detalle ? ` Detalle: ${t.problema_detalle}` : ""}
+            </p>
+          )}
+          {t.constancia && (
+            <p className="mt-3 text-sm">
+              Constancia <strong>{t.constancia.numero}</strong> ·{" "}
+              {fechaLima(t.constancia.emitida_at)} (Lima)
+            </p>
+          )}
+          <div className="mt-4">
+            <AccionesTrato trato={t} />
+          </div>
         </li>
       ))}
     </ul>

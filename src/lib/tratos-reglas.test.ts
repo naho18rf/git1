@@ -1,7 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { accionesDisponibles, contactoVisible, contarPendientes, siguienteEstado, datosOtraEmpresa, enlaceWhatsApp, MAX_SOLICITUDES_PENDIENTES, puedeAccion, puedeSolicitar, puedeSolicitarLote, solicitarSchema } from "./tratos-reglas";
+import {
+  accionesDisponibles,
+  contactoVisible,
+  contarPendientes,
+  siguienteEstado,
+  datosOtraEmpresa,
+  enlaceWhatsApp,
+  MAX_SOLICITUDES_PENDIENTES,
+  puedeAccion,
+  puedeSolicitar,
+  puedeSolicitarLote,
+  solicitarSchema,
+} from "./tratos-reglas";
 
-const empresa = { nombre_empresa: "Textiles SAC", representante: "Ana", telefono: "987654321", correo: "a@t.pe" };
+const empresa = {
+  nombre_empresa: "Textiles SAC",
+  representante: "Ana",
+  telefono: "987654321",
+  correo: "a@t.pe",
+};
 
 describe("transiciones de trato", () => {
   it("la vendedora acepta o rechaza una solicitud", () => {
@@ -58,14 +75,16 @@ describe("entrega y recepción", () => {
 
 describe("indicador de pendientes", () => {
   it("cuenta solo los tratos que esperan una acción tuya", () => {
-    expect(contarPendientes([
-      { estado: "solicitada", rol: "vendedora" }, // aceptar o rechazar
-      { estado: "aceptada", rol: "vendedora" }, // marcar entregado
-      { estado: "entregada", rol: "compradora" }, // confirmar recepción
-      { estado: "solicitada", rol: "compradora" }, // espera a la vendedora
-      { estado: "entregada", rol: "vendedora" }, // espera a la compradora
-      { estado: "completada", rol: "compradora" },
-    ])).toBe(3);
+    expect(
+      contarPendientes([
+        { estado: "solicitada", rol: "vendedora" }, // aceptar o rechazar
+        { estado: "aceptada", rol: "vendedora" }, // marcar entregado
+        { estado: "entregada", rol: "compradora" }, // confirmar recepción
+        { estado: "solicitada", rol: "compradora" }, // espera a la vendedora
+        { estado: "entregada", rol: "vendedora" }, // espera a la compradora
+        { estado: "completada", rol: "compradora" },
+      ]),
+    ).toBe(3);
   });
   it("sin tratos no hay pendientes", () => {
     expect(contarPendientes([])).toBe(0);
@@ -82,7 +101,10 @@ describe("límite de solicitudes", () => {
     expect(puedeSolicitar({ tieneCompletado: true, pendientes: 10 })).toBe(true);
   });
   it("el mensaje admite máximo 300 caracteres", () => {
-    const base = { loteId: "00000000-0000-4000-8000-000000000000", recogida: "Recogemos con nuestra movilidad" };
+    const base = {
+      loteId: "00000000-0000-4000-8000-000000000000",
+      recogida: "Recogemos con nuestra movilidad",
+    };
     expect(solicitarSchema.safeParse({ ...base, mensaje: "a".repeat(300) }).success).toBe(true);
     expect(solicitarSchema.safeParse({ ...base, mensaje: "a".repeat(301) }).success).toBe(false);
   });
@@ -90,17 +112,27 @@ describe("límite de solicitudes", () => {
 
 describe("botón solicitar lote", () => {
   it("una empresa con sesión puede solicitar un lote publicado de otra", () => {
-    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "publicado" })).toBe(true);
+    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "publicado" })).toBe(
+      true,
+    );
   });
   it("nadie solicita su propio lote", () => {
-    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: true, estado: "publicado" })).toBe(false);
+    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: true, estado: "publicado" })).toBe(
+      false,
+    );
   });
   it("sin sesión no se solicita", () => {
-    expect(puedeSolicitarLote({ tieneSesion: false, esDueno: false, estado: "publicado" })).toBe(false);
+    expect(puedeSolicitarLote({ tieneSesion: false, esDueno: false, estado: "publicado" })).toBe(
+      false,
+    );
   });
   it("un lote que no está publicado no se puede solicitar", () => {
-    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "reservado" })).toBe(false);
-    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "en_revision" })).toBe(false);
+    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "reservado" })).toBe(
+      false,
+    );
+    expect(puedeSolicitarLote({ tieneSesion: true, esDueno: false, estado: "en_revision" })).toBe(
+      false,
+    );
   });
 });
 
@@ -115,7 +147,7 @@ describe("datos de contacto", () => {
     }
   });
   it("se muestran a ambas partes después de aceptar", () => {
-    expect(datosOtraEmpresa("aceptada", empresa).telefono).toBe("987654321");
+    expect(datosOtraEmpresa("aceptada", empresa)).toEqual({ ...empresa, contacto: true });
     expect(enlaceWhatsApp("987 654 321")).toBe("https://wa.me/51987654321");
   });
 });

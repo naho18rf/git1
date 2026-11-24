@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/panel/perfil")({
   component: PerfilPage,
 });
 
-export function PerfilPage() {
+function PerfilPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const { data: empresa, isLoading, isError } = useQuery(empresaQuery(user.id));

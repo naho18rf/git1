@@ -49,8 +49,11 @@ vi.mock("@/components/ui/checkbox", () => ({
   ),
 }));
 
-import { RegistroPage } from "@/routes/registro";
-import { PerfilPage, Route as PerfilRoute } from "@/routes/_authenticated/panel/perfil";
+import { Route as RegistroRoute } from "@/routes/registro";
+import { Route as PerfilRoute } from "@/routes/_authenticated/panel/perfil";
+
+const RegistroPage = RegistroRoute.options.component!;
+const PerfilPage = PerfilRoute.options.component!;
 
 const userId = "7e20a222-f63f-4f0f-9479-e58a946bc238";
 const datos = {

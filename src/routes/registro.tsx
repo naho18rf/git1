@@ -33,7 +33,7 @@ export const Route = createFileRoute("/registro")({
   component: RegistroPage,
 });
 
-export function RegistroPage() {
+function RegistroPage() {
   const navigate = useNavigate();
   const { session, ready } = useAuth();
   const [error, setError] = useState<string | null>(null);

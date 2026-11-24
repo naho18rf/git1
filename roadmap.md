@@ -8,9 +8,7 @@
 
 ## En curso
 
-- [x] Corregir el guardado de la empresa al registrarse y probar que sus datos persisten al cambiar de sección
-- [x] Mejorar solo el análisis de merma: categorías existentes, salida fija, incertidumbre, avisos de manejo y hasta 3 fotos; sin cambiar diseño, flujo ni historial
-- [ ] Revisar el correo disponible y agregar avisos de tratos sin duplicados; si falta configuración externa, usar aviso visible y contador sin cambiar el contacto ni el flujo actual
+(nada abierto)
 
 ## Hecho (iteración 2)
 
@@ -55,6 +53,17 @@
 - [x] Historial privado por empresa con fotos privadas y cambios guardados
 - [x] Flujo real probado con foto de textiles: análisis, edición y persistencia tras recargar
 - [x] Pruebas: 71 pasan
+
+## Hecho (iteración 8 — registro, análisis y avisos)
+
+- [x] Restaurado el guardado automático de empresas y recuperada la cuenta que no tenía fila; errores visibles si falta el registro
+- [x] Prueba real y automatizada: registrar empresa → cambiar de sección → todos los datos siguen visibles
+- [x] Analizar merma: hasta 3 fotos, categorías de Publicar lote, usos para Lima y Callao, limitaciones y avisos de manejo; ficha editable sin precios ni peso
+- [x] Análisis real con 3 fotos verificado: categoría textil, confianza media, recomendaciones y limitaciones visibles
+- [x] No hay correo de aplicación configurado: avisos internos al entrar en Mis tratos y contador sin duplicar eventos
+- [x] Solicitudes, aceptación, rechazo, entrega, constancia y problema generan avisos únicos para las empresas y admin correspondientes
+- [x] Verificados 13 avisos sin datos de contacto; contacto oculto antes de aceptar y completo después, con WhatsApp intacto
+- [x] Pruebas: 77 pasan. Typecheck y lint de archivos modificados: sin errores
 
 ## Próximo
 
