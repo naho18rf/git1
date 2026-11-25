@@ -1,9 +1,7 @@
 import {
-  Camera,
   Flower2,
   Handshake,
   Home,
-  Map,
   PackagePlus,
   ShieldCheck,
   Sprout,
@@ -15,12 +13,10 @@ import {
 export type PanelPath =
   | "/panel"
   | "/panel/asistente"
-  | "/panel/analizar"
   | "/panel/publicar"
   | "/panel/mercado"
   | "/panel/tratos"
   | "/panel/impacto"
-  | "/panel/mapa"
   | "/panel/perfil"
   | "/panel/admin";
 
@@ -49,13 +45,6 @@ export const PANEL_ITEMS: PanelItem[] = [
     disponible: true,
   },
   {
-    to: "/panel/analizar",
-    label: "Analizar merma",
-    descripcion: "Sube una foto y obtén una ficha sugerida del material.",
-    icon: Camera,
-    disponible: true,
-  },
-  {
     to: "/panel/publicar",
     label: "Publicar lote",
     descripcion: "Crea un lote con su pasaporte y código QR.",
@@ -81,14 +70,7 @@ export const PANEL_ITEMS: PanelItem[] = [
     label: "Impacto",
     descripcion: "Tus kg desviados, CO₂e y agua estimados.",
     icon: Sprout,
-    disponible: true,
-  },
-  {
-    to: "/panel/mapa",
-    label: "Mapa",
-    descripcion: "Mapa de simbiosis industrial en Lima y Callao.",
-    icon: Map,
-    disponible: true,
+    disponible: false,
   },
   {
     to: "/panel/perfil",
