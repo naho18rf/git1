@@ -75,6 +75,13 @@ function Hero() {
             Remanente conecta a las empresas que generan residuos industriales con aquellas que
             pueden usarlos como materia prima. Menos relleno sanitario, más valor compartido.
           </p>
+          <p className="mt-4 animate-rise text-[15px] leading-relaxed text-deep-muted [animation-delay:400ms]">
+            Abierta a toda empresa manufacturera, y con reconocimiento al liderazgo de las mujeres que
+            ya transforman la industria.
+          </p>
+          <p className="mt-3 animate-rise font-display text-lg italic text-rose [animation-delay:430ms]">
+            Donde las mujeres suman, la industria florece.
+          </p>
           <Button
             size="lg"
             variant="rose"
@@ -86,6 +93,16 @@ function Hero() {
               Sube una foto de tu merma
             </Link>
           </Button>
+          <div className="mt-6 flex animate-rise flex-wrap gap-2 [animation-delay:560ms]">
+            {["ODS 9 · Industria, innovación e infraestructura", "ODS 12 · Producción y consumo responsables"].map((ods) => (
+              <span key={ods} className="rounded-full border border-ivory/25 bg-ivory/8 px-3 py-1 text-xs text-ivory">
+                {ods}
+              </span>
+            ))}
+          </div>
+          <p className="mt-3 animate-rise text-xs text-deep-muted [animation-delay:600ms]">
+            Con enfoque transversal en el ODS 5: igualdad de género.
+          </p>
         </div>
       </div>
       <nav

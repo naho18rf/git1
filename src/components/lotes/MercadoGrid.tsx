@@ -9,6 +9,7 @@ import { mercadoQuery, fechaLima } from "@/lib/lotes";
 import { nombreCategoria } from "@/lib/materiales";
 import { puedeSolicitarLote } from "@/lib/tratos-reglas";
 import { filtrarLotes, hayFiltroActivo, opcionesFiltro, SIN_FILTRO, type FiltroLotes } from "@/lib/lotes-filtro";
+import { MapaEmpresasCercanas } from "./MapaEmpresasCercanas";
 
 const selectClass = "h-11 w-full rounded-md border border-input bg-surface px-3 text-sm sm:w-64";
 
@@ -33,6 +34,7 @@ export function MercadoGrid() {
 
   if (!lotes.length) {
     return (
+      <>
       <div className="surface-card mt-8 flex flex-col items-start gap-4 p-8">
         <Store className="h-6 w-6 text-clay" strokeWidth={1.5} aria-hidden="true" />
         <h2 className="font-display text-2xl text-primary-deep">Aún no hay lotes publicados</h2>
@@ -43,11 +45,14 @@ export function MercadoGrid() {
           <Link to="/registro">Registrar mi empresa</Link>
         </Button>
       </div>
+      <MapaEmpresasCercanas lotes={lotes} />
+      </>
     );
   }
 
   return (
     <div className="mt-8">
+      <MapaEmpresasCercanas lotes={visibles} />
       <div className="flex flex-wrap items-end gap-4 border-y border-border py-5">
         <div>
           <label htmlFor="filtro-categoria" className="block text-sm font-medium">

@@ -7,7 +7,7 @@ export const Route = createFileRoute("/mercado")({
   head: () => {
     const title = "Mercado de lotes · Remanente";
     const description =
-      "Lotes de merma industrial publicados por empresas de Lima y Callao, con su foto, su peso aproximado y su distrito.";
+      "Explora lotes de merma industrial de Lima y Callao y empresas cercanas con mapa de referencia distrital y filtros de distancia.";
     return {
       meta: [
         { title },

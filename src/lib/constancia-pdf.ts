@@ -37,6 +37,9 @@ export async function descargarConstanciaPdf(trato: Trato, qrDataUrl: string) {
   doc.setFont("courier", "normal"); doc.setFontSize(9); doc.text(c.hash_sha256, 18, y); y += 8;
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(90);
   doc.text(`Verifica en ${window.location.origin}/constancia/${c.numero}`, 18, y);
+  y += 5;
+  const ods = doc.splitTextToSize("Aporta a los ODS 9 y 12, con enfoque transversal en el ODS 5 (igualdad de género).", 174);
+  doc.text(ods, 18, y);
   doc.setFontSize(9);
   doc.text("Constancia de entrega registrada en Remanente. No es un contrato ni una certificación ambiental oficial.", 105, 285, { align: "center" });
   doc.save(`constancia-${c.numero}.pdf`);
