@@ -6,9 +6,11 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccionesTrato } from "@/components/tratos/AccionesTrato";
+import { TarjetaPrimerLote } from "@/components/tratos/TarjetaPrimerLote";
 import { avisosTratosQuery, marcarAvisosLeidos } from "@/lib/avisos";
 import { fechaLima } from "@/lib/lotes";
 import { nombreCategoria } from "@/lib/materiales";
+import { tratoPrimerLote } from "@/lib/primer-lote";
 import { misTratosQuery, type Trato } from "@/lib/tratos";
 import { contarPendientes, ESTADO_TRATO_LABEL } from "@/lib/tratos-reglas";
 
@@ -24,6 +26,7 @@ function TratosPage() {
   const { data: avisos = [] } = useQuery(avisosTratosQuery(user.id));
   const compras = data.filter((t) => t.rol === "compradora");
   const ventas = data.filter((t) => t.rol === "vendedora");
+  const primerLote = tratoPrimerLote(data);
   const pend = (l: Trato[]) => contarPendientes(l);
 
   useEffect(() => {
@@ -70,6 +73,7 @@ function TratosPage() {
           </ul>
         </section>
       )}
+      {primerLote && <TarjetaPrimerLote trato={primerLote} />}
       {isLoading ? (
         <p className="mt-8 text-muted-foreground">Cargando tus tratos…</p>
       ) : error ? (
