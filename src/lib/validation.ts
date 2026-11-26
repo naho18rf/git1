@@ -30,6 +30,24 @@ const texto = (campo: string, max: number) =>
     .min(1, { message: `Ingresa ${campo}` })
     .max(max, { message: `Máximo ${max} caracteres` });
 
+/**
+ * Respuesta opcional sobre si la empresa está dirigida por una mujer.
+ * El valor "" significa "no respondió" y se guarda como NULL en la base de datos.
+ */
+export const DIRIGIDA_MUJER_OPCIONES = [
+  { value: "si", label: "Sí" },
+  { value: "no", label: "No" },
+  { value: "prefiero_no_decir", label: "Prefiero no decir" },
+] as const;
+
+export type DirigidaMujer = (typeof DIRIGIDA_MUJER_OPCIONES)[number]["value"] | "";
+
+const dirigida_por_mujer = z
+  .string()
+  .refine((v) => (DIRIGIDA_MUJER_OPCIONES as readonly { value: string }[]).some((o) => o.value === v) || v === "", {
+    message: "Elige una opción",
+  });
+
 export const empresaFields = {
   nombre_empresa: texto("el nombre de la empresa", 200),
   ruc: z
@@ -47,6 +65,7 @@ export const empresaFields = {
     .string()
     .refine((v) => DISTRITOS.includes(v), { message: "Elige un distrito de Lima o Callao" }),
   direccion: texto("la dirección", 300),
+  dirigida_por_mujer,
 };
 
 export const perfilSchema = z.object(empresaFields);

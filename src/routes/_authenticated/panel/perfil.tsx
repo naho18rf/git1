@@ -12,7 +12,12 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { empresaQuery } from "@/lib/empresa";
 import { DISTRITOS_CALLAO, DISTRITOS_LIMA } from "@/lib/peru";
-import { normalizePeruPhone, perfilSchema, type PerfilValues } from "@/lib/validation";
+import {
+  DIRIGIDA_MUJER_OPCIONES,
+  normalizePeruPhone,
+  perfilSchema,
+  type PerfilValues,
+} from "@/lib/validation";
 
 export const Route = createFileRoute("/_authenticated/panel/perfil")({
   head: () => ({ meta: [{ title: "Mi perfil · Remanente" }] }),
@@ -33,6 +38,7 @@ function PerfilPage() {
       telefono: "",
       distrito: "",
       direccion: "",
+      dirigida_por_mujer: "",
     },
   });
   const { errors, isSubmitting, isDirty } = form.formState;
@@ -46,6 +52,7 @@ function PerfilPage() {
         telefono: empresa.telefono ?? "",
         distrito: empresa.distrito ?? "",
         direccion: empresa.direccion ?? "",
+        dirigida_por_mujer: empresa.dirigida_por_mujer ?? "",
       });
     }
   }, [empresa, form]);
@@ -53,7 +60,7 @@ function PerfilPage() {
   const onSubmit = form.handleSubmit(async (v) => {
     const { data: actualizada, error } = await supabase
       .from("empresas")
-      .update({ ...v, telefono: normalizePeruPhone(v.telefono) })
+      .update({ ...v, telefono: normalizePeruPhone(v.telefono), dirigida_por_mujer: v.dirigida_por_mujer || null })
       .eq("id", user.id)
       .select("id")
       .maybeSingle();
@@ -144,6 +151,22 @@ function PerfilPage() {
           </Field>
           <Field id="direccion" label="Dirección" error={errors.direccion?.message}>
             <Input {...reg("direccion")} />
+          </Field>
+          <Field
+            id="dirigida_por_mujer"
+            label="¿Tu empresa está dirigida por una mujer?"
+            error={errors.dirigida_por_mujer?.message}
+            hint="Es opcional. Solo se usa para una cifra general de la plataforma."
+            className="sm:col-span-2"
+          >
+            <select className={selectClass} {...reg("dirigida_por_mujer")}>
+              <option value="">Elige una opción</option>
+              {DIRIGIDA_MUJER_OPCIONES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </Field>
           <div className="flex justify-end border-t border-border pt-6 sm:col-span-2">
             <Button type="submit" disabled={isSubmitting || !isDirty}>

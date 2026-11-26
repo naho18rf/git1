@@ -11,7 +11,12 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, useAuth } from "@/lib/auth";
 import { DISTRITOS_CALLAO, DISTRITOS_LIMA } from "@/lib/peru";
-import { normalizePeruPhone, registroSchema, type RegistroValues } from "@/lib/validation";
+import {
+  DIRIGIDA_MUJER_OPCIONES,
+  normalizePeruPhone,
+  registroSchema,
+  type RegistroValues,
+} from "@/lib/validation";
 
 export const Route = createFileRoute("/registro")({
   head: () => ({
@@ -55,6 +60,7 @@ function RegistroPage() {
       telefono: "",
       distrito: "",
       direccion: "",
+      dirigida_por_mujer: "",
       acepta_terminos: false,
     },
   });
@@ -74,6 +80,7 @@ function RegistroPage() {
           telefono: normalizePeruPhone(v.telefono),
           distrito: v.distrito,
           direccion: v.direccion,
+          dirigida_por_mujer: v.dirigida_por_mujer || null,
           acepta_terminos: v.acepta_terminos,
         },
       },
@@ -174,6 +181,22 @@ function RegistroPage() {
             className="sm:col-span-2"
           >
             <Input autoComplete="street-address" {...reg("direccion")} />
+          </Field>
+          <Field
+            id="dirigida_por_mujer"
+            label="¿Tu empresa está dirigida por una mujer?"
+            error={errors.dirigida_por_mujer?.message}
+            hint="Es opcional. Solo se usa para una cifra general de la plataforma."
+            className="sm:col-span-2"
+          >
+            <select className={selectClass} {...reg("dirigida_por_mujer")}>
+              <option value="">Elige una opción</option>
+              {DIRIGIDA_MUJER_OPCIONES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </Field>
         </fieldset>
 

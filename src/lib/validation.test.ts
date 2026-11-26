@@ -9,6 +9,7 @@ const base = {
   telefono: "987654321",
   distrito: "Ate",
   direccion: "Av. Principal 123",
+  dirigida_por_mujer: "",
   correo: "ana@empresa.pe",
   password: "claveSegura1",
   confirmacion: "claveSegura1",

@@ -288,6 +288,7 @@ export type Database = {
           correo: string | null
           created_at: string
           direccion: string | null
+          dirigida_por_mujer: string | null
           distrito: string | null
           id: string
           nombre_empresa: string | null
@@ -301,6 +302,7 @@ export type Database = {
           correo?: string | null
           created_at?: string
           direccion?: string | null
+          dirigida_por_mujer?: string | null
           distrito?: string | null
           id: string
           nombre_empresa?: string | null
@@ -314,6 +316,7 @@ export type Database = {
           correo?: string | null
           created_at?: string
           direccion?: string | null
+          dirigida_por_mujer?: string | null
           distrito?: string | null
           id?: string
           nombre_empresa?: string | null
@@ -617,6 +620,13 @@ export type Database = {
       hash_constancia: {
         Args: { p_emitida: string; p_snapshot: Json }
         Returns: string
+      }
+      impacto_liderazgo_femenino: {
+        Args: never
+        Returns: {
+          empresas_dirigidas_mujeres: number
+          empresas_que_respondieron: number
+        }[]
       }
       impacto_publico: {
         Args: never

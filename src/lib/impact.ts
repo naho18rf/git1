@@ -36,3 +36,32 @@ export const impactoPublicoQuery = queryOptions({
 
 export const formatNumero = (n: number) =>
   new Intl.NumberFormat("es-PE", { maximumFractionDigits: 0 }).format(n);
+
+export type LiderazgoFemenino = {
+  respondieron: number;
+  dirigidas: number;
+};
+
+/**
+ * Cifra agregada de liderazgo femenino: solo dos totales de toda la plataforma.
+ * Nunca devuelve datos de una empresa en particular.
+ */
+export const liderazgoFemeninoQuery = queryOptions({
+  queryKey: ["impacto", "liderazgo-femenino"],
+  queryFn: async (): Promise<LiderazgoFemenino> => {
+    const { data, error } = await supabase.rpc("impacto_liderazgo_femenino");
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      respondieron: Number(row?.empresas_que_respondieron ?? 0),
+      dirigidas: Number(row?.empresas_dirigidas_mujeres ?? 0),
+    };
+  },
+  staleTime: 60_000,
+});
+
+/** Porcentaje con un decimal máximo, en formato es-PE (ej.: 33,3). */
+export const formatoPorcentaje = (dirigidas: number, respondieron: number) =>
+  new Intl.NumberFormat("es-PE", { maximumFractionDigits: 1 }).format(
+    (dirigidas / respondieron) * 100,
+  );

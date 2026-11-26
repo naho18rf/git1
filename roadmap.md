@@ -65,6 +65,14 @@
 - [x] Verificados 13 avisos sin datos de contacto; contacto oculto antes de aceptar y completo después, con WhatsApp intacto
 - [x] Pruebas: 77 pasan. Typecheck y lint de archivos modificados: sin errores
 
+## Hecho (iteración 9 — dato opcional de liderazgo femenino)
+
+- [x] Registro de empresa: campo opcional "¿Tu empresa está dirigida por una mujer?" (Sí / No / Prefiero no decir), guardado en la ficha
+- [x] Mi perfil: la respuesta se puede cambiar en cualquier momento
+- [x] Impacto del panel: "% de empresas dirigidas por mujeres" debajo de los totales, solo con quienes respondieron; "Aún sin datos" si nadie respondió
+- [x] Verificado en el navegador: guardar → recargar → sigue ahí; la cifra sube a 100% con 1 respuesta y vuelve a "Aún sin datos" al quitarla
+- [x] Pruebas: 99 pasan. Typecheck y compilación: sin errores
+
 ## Próximo
 
 - [ ] Verificación de empresas con SUNAT

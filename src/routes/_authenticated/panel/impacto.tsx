@@ -4,7 +4,12 @@ import { Camera, Droplets, Handshake, Recycle, Wind } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatNumero, impactoPublicoQuery } from "@/lib/impact";
+import {
+  formatoPorcentaje,
+  formatNumero,
+  impactoPublicoQuery,
+  liderazgoFemeninoQuery,
+} from "@/lib/impact";
 
 export const Route = createFileRoute("/_authenticated/panel/impacto")({
   head: () => ({ meta: [{ title: "Impacto · Remanente" }] }),
@@ -20,6 +25,11 @@ const PASOS = [
 
 function ImpactoPage() {
   const { data, isLoading, isError } = useQuery(impactoPublicoQuery);
+  const {
+    data: liderazgo,
+    isLoading: liderazgoCargando,
+    isError: liderazgoError,
+  } = useQuery(liderazgoFemeninoQuery);
 
   const valor = (n: number | undefined) => (isLoading ? "…" : isError ? "—" : formatNumero(n ?? 0));
 
@@ -57,6 +67,30 @@ function ImpactoPage() {
           ? "No pudimos cargar las cifras en este momento."
           : "Son cifras reales: empiezan en 0 y crecen con cada entrega confirmada."}
       </p>
+
+      <div className="mt-6 surface-card p-5">
+        <p className="text-sm text-muted-foreground">% de empresas dirigidas por mujeres</p>
+        {liderazgoCargando || liderazgoError || !liderazgo || liderazgo.respondieron === 0 ? (
+          <p className="mt-2 text-heading text-primary-deep">
+            {liderazgoCargando
+              ? "Cargando…"
+              : liderazgoError
+                ? "No pudimos cargar esta cifra."
+                : "Aún sin datos"}
+          </p>
+        ) : (
+          <p className="mt-2 font-display text-4xl leading-none font-medium text-primary-deep tabular-nums">
+            {formatoPorcentaje(liderazgo.dirigidas, liderazgo.respondieron)}%
+          </p>
+        )}
+        <p className="mt-2 text-sm text-muted-foreground">
+          {liderazgo && !liderazgoCargando && !liderazgoError && liderazgo.respondieron > 0
+            ? `Sobre ${formatNumero(liderazgo.respondieron)} ${
+                liderazgo.respondieron === 1 ? "empresa que respondió" : "empresas que respondieron"
+              } esta pregunta.`
+            : "Se calcula solo con las empresas que respondieron esta pregunta."}
+        </p>
+      </div>
 
       <div className="mt-12 rounded-lg bg-rose-pale p-6 md:p-8">
         <Badge variant="outline">Ejemplo ilustrativo</Badge>

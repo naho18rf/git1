@@ -29,6 +29,13 @@
       "when": 1795307613445,
       "tag": "0003_crear_avisos_internos_tratos",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795722509499,
+      "tag": "0004_registrar_empresa_dirigida_por_mujer",
+      "breakpoints": true
     }
   ]
 }
