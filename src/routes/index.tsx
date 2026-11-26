@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { HeroFlow } from "@/components/site/HeroFlow";
 import { PageShell } from "@/components/site/PageShell";
 import { PasosInteractivos } from "@/components/site/PasosInteractivos";
+import { PorQueRemanente } from "@/components/site/PorQueRemanente";
 import { Reveal } from "@/components/site/Reveal";
 import { formatNumero, impactoPublicoQuery } from "@/lib/impact";
 
@@ -45,6 +46,7 @@ function Landing() {
     <PageShell>
       <Hero />
       <Pasos />
+      <PorQueRemanente />
       <Impacto />
       <Mercado />
       <Pasaporte />

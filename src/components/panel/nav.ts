@@ -70,7 +70,7 @@ export const PANEL_ITEMS: PanelItem[] = [
     label: "Impacto",
     descripcion: "Tus kg desviados, CO₂e y agua estimados.",
     icon: Sprout,
-    disponible: false,
+    disponible: true,
   },
   {
     to: "/panel/perfil",
