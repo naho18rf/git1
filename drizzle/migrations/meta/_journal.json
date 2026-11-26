@@ -36,6 +36,13 @@
       "when": 1795722509499,
       "tag": "0004_registrar_empresa_dirigida_por_mujer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795722660751,
+      "tag": "0005_empresas_sugeridas_lote",
+      "breakpoints": true
     }
   ]
 }

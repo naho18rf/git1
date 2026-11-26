@@ -608,6 +608,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      empresas_sugeridas_lote: {
+        Args: { p_lote: string }
+        Returns: {
+          distrito: string
+          nombre_empresa: string
+          ya_solicito: boolean
+        }[]
+      }
       foto_es_publica: { Args: { _ruta: string }; Returns: boolean }
       generar_codigo_lote: { Args: never; Returns: string }
       has_role: {

@@ -128,3 +128,9 @@ export const reportarLote = createServerFn({ method: "POST" }).middleware([requi
   }
   return { ok: true };
 });
+export const listarEmpresasSugeridas = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((v: unknown) => z.object({ loteId: z.string().uuid(), distrito: z.string().max(80) }).parse(v)).handler(async ({ data, context }) => {
+  const { data: filas, error } = await context.supabase.rpc("empresas_sugeridas_lote", { p_lote: data.loteId });
+  if (error) throw new Error("No pudimos cargar las empresas sugeridas.");
+  const { empresasSugeridas } = await import("./empresas-cercanas");
+  return empresasSugeridas((filas ?? []).map((f) => ({ nombre_empresa: f.nombre_empresa ?? "", distrito: f.distrito ?? "", ya_solicito: !!f.ya_solicito })), data.distrito);
+});

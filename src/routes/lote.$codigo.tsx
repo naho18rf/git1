@@ -6,6 +6,7 @@ import { QRCodeCanvas } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/site/PageShell";
+import { EmpresasSugeridas } from "@/components/lotes/EmpresasSugeridas";
 import { ReportarLote } from "@/components/lotes/ReportarLote";
 import { SolicitarLote } from "@/components/tratos/SolicitarLote";
 import { TratoEnLote } from "@/components/tratos/TratoEnLote";
@@ -119,6 +120,8 @@ function PasaportePage() {
             <p className="mt-6 text-sm text-muted-foreground">
               Registro de Remanente. No es una certificación ambiental oficial.
             </p>
+
+            {ready && session && lote.empresa_id === session.user.id && <EmpresasSugeridas loteId={lote.id} distrito={lote.distrito} />}
 
             {ready && session && <TratoEnLote codigo={lote.codigo} userId={session.user.id} />}
 

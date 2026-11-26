@@ -54,3 +54,21 @@ export function enlacesMapa({ lat, lng }: Coordenadas) {
     indicaciones: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
   };
 }
+export type CandidataLote = { nombre_empresa: string; distrito: string; ya_solicito: boolean };
+
+/** Hasta 5 empresas: mismo distrito primero, luego las que ya solicitaron la categoría, luego por cercanía. */
+export function empresasSugeridas(candidatas: readonly CandidataLote[], distritoLote: string, max = 5) {
+  const norm = (d: string) => d.trim().toLocaleLowerCase("es-PE");
+  const origen = coordenadasDistrito(distritoLote);
+  const dist = (d: string) => {
+    if (norm(d) === norm(distritoLote)) return 0;
+    const c = coordenadasDistrito(d);
+    return origen && c ? distanciaKm(origen, c) : Number.POSITIVE_INFINITY;
+  };
+  return [...candidatas]
+    .map((c) => ({ ...c, mismo: norm(c.distrito) === norm(distritoLote), km: dist(c.distrito) }))
+    .sort((a, b) => Number(b.mismo) - Number(a.mismo) || Number(b.ya_solicito) - Number(a.ya_solicito)
+      || a.km - b.km || a.nombre_empresa.localeCompare(b.nombre_empresa, "es-PE"))
+    .slice(0, max)
+    .map(({ nombre_empresa, distrito }) => ({ nombre_empresa, distrito }));
+}

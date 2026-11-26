@@ -13,6 +13,7 @@ import { publicarLoteSchema } from "@/lib/lotes-reglas";
 import type { Tables } from "@/integrations/supabase/types";
 import { CamaraLote, type CodigoFoto, type FotoPendiente } from "./CamaraLote";
 import { DetallesLote, type Detalles } from "./DetallesLote";
+import { EmpresasSugeridas } from "./EmpresasSugeridas";
 
 export function PublicarLoteForm({ userId }: { userId: string }) {
   const { data: empresa } = useQuery(empresaQuery(userId));
@@ -24,19 +25,19 @@ export function PublicarLoteForm({ userId }: { userId: string }) {
   const [fotos, setFotos] = useState<FotoPendiente[]>([]);
   const [codigo, setCodigo] = useState<CodigoFoto | null>(null);
   const [declaracion, setDeclaracion] = useState(false);
-  const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [success, setSuccess] = useState("");
+  const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [success, setSuccess] = useState(""); const [publicado, setPublicado] = useState<{ id: string; distrito: string } | null>(null);
   const [editing, setEditing] = useState<Tables<"lotes"> | null>(null);
   const [editDetails, setEditDetails] = useState<Detalles>({ categoria: "", descripcion: "", peso_kg: "", empaque: "", distrito: "" });
   useEffect(() => { if (empresa?.distrito) setDetails(prev => prev.distrito ? prev : { ...prev, distrito: empresa.distrito ?? "" }); }, [empresa?.distrito]);
   async function refresh() { await client.invalidateQueries({ queryKey: ["mis-lotes", userId] }); await client.invalidateQueries({ queryKey: ["mercado"] }); }
   async function submit() {
-    setError(""); setSuccess("");
+    setError(""); setSuccess(""); setPublicado(null);
     const parsed = publicarLoteSchema.safeParse({ ...details, declaracion, codigoId: codigo?.id, fotos: fotos.map(({ ruta, enVivo }) => ({ ruta, enVivo })) });
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Revisa los datos."); return; }
     setBusy(true);
     try {
       const lote = await publish({ data: parsed.data });
-      setSuccess(lote.estado === "en_revision" ? `${lote.codigo}: tu lote quedó en revisión. Aún no se muestra en el mercado.` : `${lote.codigo}: tu lote ya está publicado.`);
+      setSuccess(lote.estado === "en_revision" ? `${lote.codigo}: tu lote quedó en revisión. Aún no se muestra en el mercado.` : `${lote.codigo}: tu lote ya está publicado.`); setPublicado({ id: lote.id, distrito: lote.distrito });
       fotos.forEach(f => URL.revokeObjectURL(f.preview)); setFotos([]); setCodigo(null); setDeclaracion(false); setStep(0);
       setDetails({ categoria: "", descripcion: "", peso_kg: "", empaque: "", distrito: empresa?.distrito ?? "" }); await refresh();
     } catch (e) { setError(e instanceof Error ? e.message : "No pudimos publicar el lote."); }
@@ -55,6 +56,7 @@ export function PublicarLoteForm({ userId }: { userId: string }) {
   return <div>
     <h1 className="text-title text-primary-deep">Publicar lote</h1>
     {success && <p role="status" className="mt-6 rounded-md border border-border bg-mint p-4">{success}</p>}
+    {publicado && <EmpresasSugeridas loteId={publicado.id} distrito={publicado.distrito} />}
     {error && <p role="alert" className="mt-6 text-destructive">{error}</p>}
     <ol className="mt-8 flex flex-wrap gap-6 border-b border-border pb-5 text-sm" aria-label="Pasos de publicación">{["Materiales", "Datos del lote", "Fotos y declaración"].map((label, i) => <li key={label} aria-current={step === i ? "step" : undefined} className={step === i ? "font-semibold text-primary" : "text-muted-foreground"}>{i + 1}. {label}</li>)}</ol>
     <div className="mt-8">
