@@ -1,0 +1,102 @@
+diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
+index 726a041..6ae7958 100644
+--- a/src/routeTree.gen.ts
++++ b/src/routeTree.gen.ts
+@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
+ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+ import { Route as AuthRouteImport } from './routes/auth'
+ import { Route as ContactoRouteImport } from './routes/contacto'
++import { Route as DemoRouteImport } from './routes/demo'
+ import { Route as EquipoRouteImport } from './routes/equipo'
+ import { Route as MercadoRouteImport } from './routes/mercado'
+ import { Route as PrivacidadRouteImport } from './routes/privacidad'
+@@ -58,6 +59,11 @@ const ContactoRoute = ContactoRouteImport.update({
+   path: '/contacto',
+   getParentRoute: () => rootRouteImport,
+ } as any)
++const DemoRoute = DemoRouteImport.update({
++  id: '/demo',
++  path: '/demo',
++  getParentRoute: () => rootRouteImport,
++} as any)
+ const EquipoRoute = EquipoRouteImport.update({
+   id: '/equipo',
+   path: '/equipo',
+@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
+   '/': typeof IndexRoute
+   '/auth': typeof AuthRoute
+   '/contacto': typeof ContactoRoute
++  '/demo': typeof DemoRoute
+   '/equipo': typeof EquipoRoute
+   '/mercado': typeof MercadoRoute
+   '/privacidad': typeof PrivacidadRoute
+@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
+   '/': typeof IndexRoute
+   '/auth': typeof AuthRoute
+   '/contacto': typeof ContactoRoute
++  '/demo': typeof DemoRoute
+   '/equipo': typeof EquipoRoute
+   '/mercado': typeof MercadoRoute
+   '/privacidad': typeof PrivacidadRoute
+@@ -258,6 +266,7 @@ export interface FileRoutesById {
+   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+   '/auth': typeof AuthRoute
+   '/contacto': typeof ContactoRoute
++  '/demo': typeof DemoRoute
+   '/equipo': typeof EquipoRoute
+   '/mercado': typeof MercadoRoute
+   '/privacidad': typeof PrivacidadRoute
+@@ -290,6 +299,7 @@ export interface FileRouteTypes {
+     | '/'
+     | '/auth'
+     | '/contacto'
++    | '/demo'
+     | '/equipo'
+     | '/mercado'
+     | '/privacidad'
+@@ -320,6 +330,7 @@ export interface FileRouteTypes {
+     | '/'
+     | '/auth'
+     | '/contacto'
++    | '/demo'
+     | '/equipo'
+     | '/mercado'
+     | '/privacidad'
+@@ -350,6 +361,7 @@ export interface FileRouteTypes {
+     | '/_authenticated'
+     | '/auth'
+     | '/contacto'
++    | '/demo'
+     | '/equipo'
+     | '/mercado'
+     | '/privacidad'
+@@ -382,6 +394,7 @@ export interface RootRouteChildren {
+   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+   AuthRoute: typeof AuthRoute
+   ContactoRoute: typeof ContactoRoute
++  DemoRoute: typeof DemoRoute
+   EquipoRoute: typeof EquipoRoute
+   MercadoRoute: typeof MercadoRoute
+   PrivacidadRoute: typeof PrivacidadRoute
+@@ -426,6 +439,13 @@ declare module '@tanstack/react-router' {
+       preLoaderRoute: typeof ContactoRouteImport
+       parentRoute: typeof rootRouteImport
+     }
++    '/demo': {
++      id: '/demo'
++      path: '/demo'
++      fullPath: '/demo'
++      preLoaderRoute: typeof DemoRouteImport
++      parentRoute: typeof rootRouteImport
++    }
+     '/equipo': {
+       id: '/equipo'
+       path: '/equipo'
+@@ -658,6 +678,7 @@ const rootRouteChildren: RootRouteChildren = {
+   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+   AuthRoute: AuthRoute,
+   ContactoRoute: ContactoRoute,
++  DemoRoute: DemoRoute,
+   EquipoRoute: EquipoRoute,
+   MercadoRoute: MercadoRoute,
+   PrivacidadRoute: PrivacidadRoute,
