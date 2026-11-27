@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Mail } from "lucide-react";
 
 import { SimplePage } from "@/components/site/SimplePage";
 import { Button } from "@/components/ui/button";
+import { CORREOS_EQUIPO } from "@/lib/contacto";
 
 export const Route = createFileRoute("/contacto")({
   head: () => ({
@@ -18,12 +20,25 @@ export const Route = createFileRoute("/contacto")({
     <SimplePage
       eyebrow="Contacto"
       title="Conversemos"
-      intro="Nuestros canales de contacto se publicarán muy pronto."
+      intro="Escríbenos a cualquiera de las fundadoras. Te respondemos por correo."
     >
-      <div className="surface-card p-8">
+      <ul className="grid gap-5 md:grid-cols-3">
+        {CORREOS_EQUIPO.map((p) => (
+          <li key={p.correo} className="surface-card p-6">
+            <Mail className="h-4 w-4 text-clay" strokeWidth={1.5} aria-hidden="true" />
+            <p className="mt-3 font-display text-lg text-primary-deep">{p.nombre}</p>
+            <a
+              href={`mailto:${p.correo}`}
+              className="mt-2 block break-all text-sm text-primary underline underline-offset-4"
+            >
+              {p.correo}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div className="surface-card mt-8 p-8">
         <p className="text-foreground">
-          Mientras tanto, puedes registrar tu empresa y te avisaremos cuando el mercado esté
-          disponible.
+          ¿Tienes residuos o necesitas materiales? Registra tu empresa y empieza a publicar tus lotes.
         </p>
         <Button className="mt-6" asChild>
           <Link to="/registro">Registrar empresa</Link>

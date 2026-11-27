@@ -11,7 +11,7 @@ import {
   liderazgoFemeninoQuery,
 } from "@/lib/impact";
 import { FACTORES, FUENTE_FACTORES } from "@/lib/factores-impacto";
-import { nombreCategoria } from "@/lib/materiales";
+import { MATERIALES_PERMITIDOS, nombreCategoria } from "@/lib/materiales";
 
 export const Route = createFileRoute("/_authenticated/panel/impacto")({
   head: () => ({ meta: [{ title: "Impacto · Remanente" }] }),
@@ -126,7 +126,10 @@ function ImpactoPage() {
       <ul className="measure mt-3 list-disc space-y-2 pl-5 text-sm text-foreground">
         <li>Solo cuentan los lotes con entrega confirmada por la empresa que los recibió.</li>
         <li>El CO₂e y el agua son estimaciones: kg del lote × factor de su material. No son mediciones oficiales.</li>
-        <li>Solo los materiales de la tabla tienen factor. El resto suma kg, pero no CO₂e ni agua.</li>
+        <li>
+          {Object.keys(FACTORES).length} de {MATERIALES_PERMITIDOS.length} materiales tienen factor. El resto suma kg, pero
+          no CO₂e ni agua.
+        </li>
         <li>Cuando el estudio no muestra ahorro de agua para un material, no se suma ahorro (aparece 0).</li>
         <li>Documento emitido por Remanente. No es una certificación ambiental oficial.</li>
       </ul>
