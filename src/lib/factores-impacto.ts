@@ -5,7 +5,8 @@
  * https://www.environment.nsw.gov.au/resources/warrlocal/100058-benefits-of-recycling.pdf
  *
  * 1 t CO₂e por tonelada = 1 kg CO₂e por kg. 1 kL por tonelada = 1 L por kg.
- * Son estimaciones de un estudio australiano de 2010, no mediciones.
+ * Excepción: alfombra usa EPA WARM v16 (EE. UU., 2023): 2,40 t CO₂e por short ton = 2,65 kg por kg; sin dato de agua.
+ * Son estimaciones de estudios extranjeros, no mediciones.
  * Los materiales que no figuran aquí no tienen un factor comparable y no suman CO₂e ni agua.
  */
 export type FactorMaterial = {
@@ -27,6 +28,8 @@ export const FACTORES: Readonly<Record<string, FactorMaterial>> = {
   plastico_limpio: { co2e: 1.08, agua: 0, tipo: "aproximado", base: "HDPE (el más bajo de los plásticos)" },
   tapas_preformas: { co2e: 1.18, agua: 0, tipo: "aproximado", base: "PET" },
   flejes: { co2e: 1.08, agua: 0, tipo: "aproximado", base: "HDPE (el más bajo de los plásticos)" },
+  carretes_conos: { co2e: 0.63, agua: 0, tipo: "aproximado", base: "Cartón (el más bajo entre cartón y madera)" },
+  alfombra_tapizado: { co2e: 2.65, agua: 0, tipo: "aproximado", base: "Alfombra, EPA WARM v16 (sin dato de agua)" },
 };
 
 export const FUENTE_FACTORES = {

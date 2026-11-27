@@ -138,7 +138,7 @@ function ImpactoPage() {
             <a href={FUENTE_FACTORES.url} target="_blank" rel="noreferrer noopener" className="underline underline-offset-4">
               {FUENTE_FACTORES.titulo}
             </a>
-            , datos comerciales e industriales.
+            , datos comerciales e industriales. Alfombra: EPA WARM v16 (EE. UU.).
           </caption>
           <thead className="text-foreground">
             <tr className="border-b border-border">
