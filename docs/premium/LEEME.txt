@@ -1,0 +1,10 @@
+CÓMO SUBIR LAS FUNCIONES PREMIUM (en este orden)
+
+1. En Lovable, escribe este mensaje y pega debajo el contenido de 01_base_de_datos.sql:
+   "Aplica este cambio de base de datos tal cual y actualiza los tipos."
+2. Descomprime el ZIP y sube su contenido a la raíz del repositorio en GitHub,
+   respetando las carpetas (en la web: Add file > Upload files, arrastrando las carpetas).
+3. En la app: entra como admin > Admin > Planes de las empresas > pon "Premium" a una empresa de prueba.
+4. Con esa empresa: menú Premium > elige materiales y guarda > descarga el PDF.
+   Publica un lote de ese material con OTRA empresa y comprueba la alerta.
+   En el Mercado, los lotes de la empresa Premium deben salir primero como "Destacado".

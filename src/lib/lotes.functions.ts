@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { priorizarLotes } from "./premium-reglas";
 import { MAX_BYTES_FOTO, MAX_LOTES_ACTIVOS_EMPRESA_NUEVA, MINUTOS_CODIGO, REPORTES_PARA_REVISION, TIPOS_FOTO, publicarLoteSchema, reportarSchema } from "./lotes-reglas";
 
 export const listarMercado = createServerFn({ method: "GET" }).handler(async () => {
@@ -14,7 +15,8 @@ export const listarMercado = createServerFn({ method: "GET" }).handler(async () 
   } } });
   const { data, error } = await client.rpc("mercado_lotes");
   if (error) throw new Error("No pudimos cargar el mercado. Inténtalo de nuevo.");
-  return Promise.all((data ?? []).map(async (lote) => {
+  const { idsPremium } = await import("./premium.server");
+  return Promise.all(priorizarLotes(data ?? [], await idsPremium()).map(async (lote) => {
     const signed = lote.foto_principal ? await client.storage.from("lote-fotos").createSignedUrl(lote.foto_principal, 3600) : null;
     const foto = signed?.data?.signedUrl?.replace(url, import.meta.env['VITE_SUPABASE_URL']) ?? null;
     return { ...lote, foto };

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useSignOut } from "@/lib/auth";
 import { avisosTratosQuery, contarNovedadesTratos } from "@/lib/avisos";
 import { empresaQuery } from "@/lib/empresa";
+import { premiumQuery } from "@/lib/premium";
 import { misTratosQuery } from "@/lib/tratos";
 
 export const Route = createFileRoute("/_authenticated/panel")({
@@ -32,8 +33,15 @@ function PanelLayout() {
   const { data: tratos = [] } = useQuery(misTratosQuery(user.id));
   const { data: avisos = [] } = useQuery(avisosTratosQuery(user.id));
   const pendientes = contarNovedadesTratos(tratos, avisos);
+  const { data: premium } = useQuery(premiumQuery(user.id));
+  const alertas = premium?.nuevas ?? 0;
   const badge = (to: string, className: string) =>
-    to === "/panel/tratos" && pendientes > 0 ? (
+    to === "/panel/premium" && alertas > 0 ? (
+      <span className={className}>
+        {alertas}
+        <span className="sr-only"> lotes nuevos para ti</span>
+      </span>
+    ) : to === "/panel/tratos" && pendientes > 0 ? (
       <span className={className}>
         {pendientes}
         <span className="sr-only">

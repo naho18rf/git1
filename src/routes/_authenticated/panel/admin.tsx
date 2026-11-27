@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
 
 import { ColaRevision } from "@/components/lotes/ColaRevision";
+import { AsignarPlanes } from "@/components/premium/AsignarPlanes";
 import { ProblemasEntrega } from "@/components/tratos/ProblemasEntrega";
 import { esAdminQuery } from "@/lib/empresa";
 
@@ -49,6 +50,11 @@ function AdminPage() {
         <h2 id="problemas-entrega" className="font-display text-2xl text-primary-deep">Entregas con problema</h2>
         <p className="measure mt-2 text-muted-foreground">Tratos que la empresa compradora no confirmó porque algo no salió bien. No se emite constancia hasta resolverlos.</p>
         <ProblemasEntrega />
+      </section>
+      <section className="mt-14" aria-labelledby="planes-empresas">
+        <h2 id="planes-empresas" className="font-display text-2xl text-primary-deep">Planes de las empresas</h2>
+        <p className="measure mt-2 text-muted-foreground">Asignación manual: los cobros aún no están activos.</p>
+        <AsignarPlanes />
       </section>
     </div>
   );

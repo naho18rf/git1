@@ -38,9 +38,9 @@ export const PLANES: Plan[] = [
     incluye: [
       { texto: "Todo lo del plan Básico" },
       { texto: "12 conexiones al mes" },
-      { texto: "Alertas cuando se publique un lote que te sirva", proximamente: true },
-      { texto: "Tus lotes aparecen primero en el mercado", proximamente: true },
-      { texto: "Reporte de impacto en PDF", proximamente: true },
+      { texto: "Alertas cuando se publique un lote que te sirva" },
+      { texto: "Tus lotes aparecen primero en el mercado" },
+      { texto: "Reporte de impacto en PDF" },
     ],
   },
 ];

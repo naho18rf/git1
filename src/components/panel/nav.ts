@@ -5,6 +5,7 @@ import {
   PackagePlus,
   ShieldCheck,
   Sprout,
+  Star,
   Store,
   UserRound,
   type LucideIcon,
@@ -17,6 +18,7 @@ export type PanelPath =
   | "/panel/mercado"
   | "/panel/tratos"
   | "/panel/impacto"
+  | "/panel/premium"
   | "/panel/perfil"
   | "/panel/admin";
 
@@ -70,6 +72,13 @@ export const PANEL_ITEMS: PanelItem[] = [
     label: "Impacto",
     descripcion: "Tus kg desviados, CO₂e y agua estimados.",
     icon: Sprout,
+    disponible: true,
+  },
+  {
+    to: "/panel/premium",
+    label: "Premium",
+    descripcion: "Alertas de lotes y reporte de impacto en PDF.",
+    icon: Star,
     disponible: true,
   },
   {

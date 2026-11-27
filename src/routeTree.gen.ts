@@ -32,6 +32,7 @@ import { Route as AuthenticatedPanelImpactoRouteImport } from './routes/_authent
 import { Route as AuthenticatedPanelMapaRouteImport } from './routes/_authenticated/panel/mapa'
 import { Route as AuthenticatedPanelMercadoRouteImport } from './routes/_authenticated/panel/mercado'
 import { Route as AuthenticatedPanelPerfilRouteImport } from './routes/_authenticated/panel/perfil'
+import { Route as AuthenticatedPanelPremiumRouteImport } from './routes/_authenticated/panel/premium'
 import { Route as AuthenticatedPanelPublicarRouteImport } from './routes/_authenticated/panel/publicar'
 import { Route as AuthenticatedPanelTratosRouteImport } from './routes/_authenticated/panel/tratos'
 import { Route as ApiPublicAsistenteRouteImport } from './routes/api/public/asistente'
@@ -156,6 +157,12 @@ const AuthenticatedPanelPerfilRoute =
     path: '/perfil',
     getParentRoute: () => AuthenticatedPanelRouteRoute,
   } as any)
+const AuthenticatedPanelPremiumRoute =
+  AuthenticatedPanelPremiumRouteImport.update({
+    id: '/premium',
+    path: '/premium',
+    getParentRoute: () => AuthenticatedPanelRouteRoute,
+  } as any)
 const AuthenticatedPanelPublicarRoute =
   AuthenticatedPanelPublicarRouteImport.update({
     id: '/publicar',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/panel/mapa': typeof AuthenticatedPanelMapaRoute
   '/panel/mercado': typeof AuthenticatedPanelMercadoRoute
   '/panel/perfil': typeof AuthenticatedPanelPerfilRoute
+  '/panel/premium': typeof AuthenticatedPanelPremiumRoute
   '/panel/publicar': typeof AuthenticatedPanelPublicarRoute
   '/panel/tratos': typeof AuthenticatedPanelTratosRoute
   '/api/public/asistente': typeof ApiPublicAsistenteRoute
@@ -236,6 +244,7 @@ export interface FileRoutesByTo {
   '/panel/mapa': typeof AuthenticatedPanelMapaRoute
   '/panel/mercado': typeof AuthenticatedPanelMercadoRoute
   '/panel/perfil': typeof AuthenticatedPanelPerfilRoute
+  '/panel/premium': typeof AuthenticatedPanelPremiumRoute
   '/panel/publicar': typeof AuthenticatedPanelPublicarRoute
   '/panel/tratos': typeof AuthenticatedPanelTratosRoute
   '/api/public/asistente': typeof ApiPublicAsistenteRoute
@@ -267,6 +276,7 @@ export interface FileRoutesById {
   '/_authenticated/panel/mapa': typeof AuthenticatedPanelMapaRoute
   '/_authenticated/panel/mercado': typeof AuthenticatedPanelMercadoRoute
   '/_authenticated/panel/perfil': typeof AuthenticatedPanelPerfilRoute
+  '/_authenticated/panel/premium': typeof AuthenticatedPanelPremiumRoute
   '/_authenticated/panel/publicar': typeof AuthenticatedPanelPublicarRoute
   '/_authenticated/panel/tratos': typeof AuthenticatedPanelTratosRoute
   '/api/public/asistente': typeof ApiPublicAsistenteRoute
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/panel/mapa'
     | '/panel/mercado'
     | '/panel/perfil'
+    | '/panel/premium'
     | '/panel/publicar'
     | '/panel/tratos'
     | '/api/public/asistente'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/panel/mapa'
     | '/panel/mercado'
     | '/panel/perfil'
+    | '/panel/premium'
     | '/panel/publicar'
     | '/panel/tratos'
     | '/api/public/asistente'
@@ -356,6 +368,7 @@ export interface FileRouteTypes {
     | '/_authenticated/panel/mapa'
     | '/_authenticated/panel/mercado'
     | '/_authenticated/panel/perfil'
+    | '/_authenticated/panel/premium'
     | '/_authenticated/panel/publicar'
     | '/_authenticated/panel/tratos'
     | '/api/public/asistente'
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPanelPerfilRouteImport
       parentRoute: typeof AuthenticatedPanelRouteRoute
     }
+    '/_authenticated/panel/premium': {
+      id: '/_authenticated/panel/premium'
+      path: '/premium'
+      fullPath: '/panel/premium'
+      preLoaderRoute: typeof AuthenticatedPanelPremiumRouteImport
+      parentRoute: typeof AuthenticatedPanelRouteRoute
+    }
     '/_authenticated/panel/publicar': {
       id: '/_authenticated/panel/publicar'
       path: '/publicar'
@@ -591,6 +611,7 @@ interface AuthenticatedPanelRouteRouteChildren {
   AuthenticatedPanelMapaRoute: typeof AuthenticatedPanelMapaRoute
   AuthenticatedPanelMercadoRoute: typeof AuthenticatedPanelMercadoRoute
   AuthenticatedPanelPerfilRoute: typeof AuthenticatedPanelPerfilRoute
+  AuthenticatedPanelPremiumRoute: typeof AuthenticatedPanelPremiumRoute
   AuthenticatedPanelPublicarRoute: typeof AuthenticatedPanelPublicarRoute
   AuthenticatedPanelTratosRoute: typeof AuthenticatedPanelTratosRoute
   AuthenticatedPanelIndexRoute: typeof AuthenticatedPanelIndexRoute
@@ -606,6 +627,7 @@ const AuthenticatedPanelRouteRouteChildren: AuthenticatedPanelRouteRouteChildren
     AuthenticatedPanelMapaRoute: AuthenticatedPanelMapaRoute,
     AuthenticatedPanelMercadoRoute: AuthenticatedPanelMercadoRoute,
     AuthenticatedPanelPerfilRoute: AuthenticatedPanelPerfilRoute,
+    AuthenticatedPanelPremiumRoute: AuthenticatedPanelPremiumRoute,
     AuthenticatedPanelPublicarRoute: AuthenticatedPanelPublicarRoute,
     AuthenticatedPanelTratosRoute: AuthenticatedPanelTratosRoute,
     AuthenticatedPanelIndexRoute: AuthenticatedPanelIndexRoute,

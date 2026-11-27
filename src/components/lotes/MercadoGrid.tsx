@@ -134,6 +134,9 @@ export function MercadoGrid() {
                   )}
                 </div>
                 <div className="p-5">
+                  {lote.destacado && (
+                    <span className="mb-2 inline-block rounded-full bg-rose-pale px-3 py-1 text-xs font-medium text-primary-deep">Destacado</span>
+                  )}
                   <p className="text-[13px] tracking-[0.16em] text-clay uppercase">{nombreCategoria(lote.categoria)}</p>
                   <p className="mt-2 font-display text-xl leading-tight text-primary-deep">
                     {lote.peso_kg} kg aprox. · {lote.distrito}
