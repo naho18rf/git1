@@ -2,6 +2,8 @@ import { queryOptions } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 
+import { impactoCalculado } from "./impacto-calculo.functions";
+
 export type ImpactoTotales = {
   kg_desviados: number;
   co2e_evitado_kg: number;
@@ -24,10 +26,12 @@ export const impactoPublicoQuery = queryOptions({
     if (error) throw error;
     const row = Array.isArray(data) ? data[0] : data;
     if (!row) return CERO;
+    // CO₂e y agua se calculan con factores por material; si falla, quedan en 0.
+    const extra = await impactoCalculado().catch(() => null);
     return {
       kg_desviados: Number(row.kg_desviados ?? 0),
-      co2e_evitado_kg: Number(row.co2e_evitado_kg ?? 0),
-      agua_ahorrada_l: Number(row.agua_ahorrada_l ?? 0),
+      co2e_evitado_kg: Math.round(extra?.co2e ?? 0),
+      agua_ahorrada_l: Math.round(extra?.agua ?? 0),
       operaciones_completadas: Number(row.operaciones_completadas ?? 0),
     };
   },

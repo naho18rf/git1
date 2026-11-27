@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { calcularImpacto } from "./factores-impacto";
 import { CLAVES_MATERIALES } from "./materiales";
 
 const SOLO_PREMIUM = "Esta función es del plan Premium.";
@@ -93,7 +94,7 @@ export const datosReporte = createServerFn({ method: "POST" })
       db()
         .from("operaciones")
         .select(
-          "kg_desviados, co2e_evitado_kg, agua_ahorrada_l, completada_at, constancias(numero)",
+          "kg_desviados, completada_at, constancias(numero), lotes(categoria)",
         )
         .eq("estado", "completada")
         .or(`empresa_vendedora_id.eq.${uid},empresa_compradora_id.eq.${uid}`)
@@ -106,12 +107,15 @@ export const datosReporte = createServerFn({ method: "POST" })
         const c = Array.isArray(o.constancias)
           ? o.constancias[0]
           : (o.constancias as { numero: string } | null);
+        const lote = Array.isArray(o.lotes) ? o.lotes[0] : o.lotes;
+        const kg = Number(o.kg_desviados);
+        const r = calcularImpacto([{ categoria: (lote?.categoria as string | undefined) ?? null, kg }]);
         return {
           fecha: o.completada_at as string | null,
           constancia: (c?.numero as string | undefined) ?? "—",
-          kg_desviados: Number(o.kg_desviados),
-          co2e_evitado_kg: Number(o.co2e_evitado_kg),
-          agua_ahorrada_l: Number(o.agua_ahorrada_l),
+          kg_desviados: kg,
+          co2e_evitado_kg: r.co2e,
+          agua_ahorrada_l: r.agua,
         };
       }),
     };

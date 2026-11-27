@@ -10,6 +10,8 @@ import {
   impactoPublicoQuery,
   liderazgoFemeninoQuery,
 } from "@/lib/impact";
+import { FACTORES, FUENTE_FACTORES } from "@/lib/factores-impacto";
+import { nombreCategoria } from "@/lib/materiales";
 
 export const Route = createFileRoute("/_authenticated/panel/impacto")({
   head: () => ({ meta: [{ title: "Impacto · Remanente" }] }),
@@ -123,9 +125,44 @@ function ImpactoPage() {
       <h2 className="mt-12 text-heading text-primary-deep">Cómo se calcula</h2>
       <ul className="measure mt-3 list-disc space-y-2 pl-5 text-sm text-foreground">
         <li>Solo cuentan los lotes con entrega confirmada por la empresa que los recibió.</li>
-        <li>El CO₂e y el agua son estimaciones según el tipo de material; no son mediciones oficiales.</li>
+        <li>El CO₂e y el agua son estimaciones: kg del lote × factor de su material. No son mediciones oficiales.</li>
+        <li>Solo los materiales de la tabla tienen factor. El resto suma kg, pero no CO₂e ni agua.</li>
+        <li>Cuando el estudio no muestra ahorro de agua para un material, no se suma ahorro (aparece 0).</li>
         <li>Documento emitido por Remanente. No es una certificación ambiental oficial.</li>
       </ul>
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full min-w-[32rem] text-left text-sm">
+          <caption className="pb-2 text-left text-muted-foreground">
+            Factores por kg de material. Fuente:{" "}
+            <a href={FUENTE_FACTORES.url} target="_blank" rel="noreferrer noopener" className="underline underline-offset-4">
+              {FUENTE_FACTORES.titulo}
+            </a>
+            , datos comerciales e industriales.
+          </caption>
+          <thead className="text-foreground">
+            <tr className="border-b border-border">
+              <th scope="col" className="py-2 pr-4 font-medium">Material</th>
+              <th scope="col" className="py-2 pr-4 font-medium">kg CO₂e por kg</th>
+              <th scope="col" className="py-2 pr-4 font-medium">Litros de agua por kg</th>
+              <th scope="col" className="py-2 font-medium">Se basa en</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(FACTORES).map(([clave, f]) => (
+              <tr key={clave} className="border-b border-border/60">
+                <td className="py-2 pr-4">{nombreCategoria(clave)}</td>
+                <td className="py-2 pr-4 tabular-nums">{f.co2e.toLocaleString("es-PE")}</td>
+                <td className="py-2 pr-4 tabular-nums">{f.agua.toLocaleString("es-PE")}</td>
+                <td className="py-2 text-muted-foreground">
+                  {f.base}
+                  {f.tipo === "aproximado" && " (aproximado)"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <Button className="mt-8" asChild>
         <Link to="/panel/publicar">
