@@ -138,7 +138,7 @@ function ImpactoPage() {
             <a href={FUENTE_FACTORES.url} target="_blank" rel="noreferrer noopener" className="underline underline-offset-4">
               {FUENTE_FACTORES.titulo}
             </a>
-            , datos comerciales e industriales. Alfombra: EPA WARM v16 (EE. UU.).
+            , datos comerciales e industriales. Alfombra: EPA WARM v16 (EE. UU.). Textil: Comisión Europea, citada en un estudio de la Universidade do Minho.
           </caption>
           <thead className="text-foreground">
             <tr className="border-b border-border">

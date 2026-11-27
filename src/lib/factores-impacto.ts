@@ -6,6 +6,8 @@
  *
  * 1 t CO₂e por tonelada = 1 kg CO₂e por kg. 1 kL por tonelada = 1 L por kg.
  * Excepción: alfombra usa EPA WARM v16 (EE. UU., 2023): 2,40 t CO₂e por short ton = 2,65 kg por kg; sin dato de agua.
+ * Excepción: textil usa 3,169 kg CO₂e por kg de ropa reutilizada en vez de incinerada (Comisión Europea, citada en Marinho Reis, Universidade do Minho,
+ * https://repositorium.sdum.uminho.pt/handle/1822/91242). Es ropa usada, no retazos industriales; es una aproximación y no tiene dato de agua.
  * Son estimaciones de estudios extranjeros, no mediciones.
  * Los materiales que no figuran aquí no tienen un factor comparable y no suman CO₂e ni agua.
  */
@@ -29,6 +31,7 @@ export const FACTORES: Readonly<Record<string, FactorMaterial>> = {
   tapas_preformas: { co2e: 1.18, agua: 0, tipo: "aproximado", base: "PET" },
   flejes: { co2e: 1.08, agua: 0, tipo: "aproximado", base: "HDPE (el más bajo de los plásticos)" },
   carretes_conos: { co2e: 0.63, agua: 0, tipo: "aproximado", base: "Cartón (el más bajo entre cartón y madera)" },
+  textil: { co2e: 3.17, agua: 0, tipo: "aproximado", base: "Ropa reutilizada vs incinerada, Comisión Europea (sin dato de agua)" },
   alfombra_tapizado: { co2e: 2.65, agua: 0, tipo: "aproximado", base: "Alfombra, EPA WARM v16 (sin dato de agua)" },
 };
 

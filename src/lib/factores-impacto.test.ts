@@ -13,7 +13,7 @@ describe("calcularImpacto", () => {
   });
 
   it("no suma CO2e ni agua de materiales sin factor", () => {
-    const r = calcularImpacto([{ categoria: "textil", kg: 50 }, { categoria: null, kg: 10 }]);
+    const r = calcularImpacto([{ categoria: "cuero", kg: 50 }, { categoria: null, kg: 10 }]);
     expect(r.co2e).toBe(0);
     expect(r.agua).toBe(0);
     expect(r.kgSinFactor).toBe(60);
