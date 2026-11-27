@@ -1,0 +1,314 @@
+diff --git a/src/components/panel/nav.ts b/src/components/panel/nav.ts
+index 2110af4..8c9c32c 100644
+--- a/src/components/panel/nav.ts
++++ b/src/components/panel/nav.ts
+@@ -2,8 +2,10 @@ import {
+   Flower2,
+   Handshake,
+   Home,
++  MapPin,
+   PackagePlus,
+   ShieldCheck,
++  Sparkles,
+   Sprout,
+   Star,
+   Store,
+@@ -14,8 +16,10 @@ import {
+ export type PanelPath =
+   | "/panel"
+   | "/panel/asistente"
++  | "/panel/analizar"
+   | "/panel/publicar"
+   | "/panel/mercado"
++  | "/panel/mapa"
+   | "/panel/tratos"
+   | "/panel/impacto"
+   | "/panel/premium"
+@@ -46,6 +50,14 @@ export const PANEL_ITEMS: PanelItem[] = [
+     icon: Flower2,
+     disponible: true,
+   },
++  {
++    to: "/panel/analizar",
++    label: "Analizar merma",
++    descripcion:
++      "Sube fotos de tu merma y la IA propone una ficha editable, con usos posibles en Lima y Callao.",
++    icon: Sparkles,
++    disponible: true,
++  },
+   {
+     to: "/panel/publicar",
+     label: "Publicar lote",
+@@ -60,6 +72,13 @@ export const PANEL_ITEMS: PanelItem[] = [
+     icon: Store,
+     disponible: true,
+   },
++  {
++    to: "/panel/mapa",
++    label: "Mapa",
++    descripcion: "Empresas con lotes publicados, por distrito y distancia.",
++    icon: MapPin,
++    disponible: true,
++  },
+   {
+     to: "/panel/tratos",
+     label: "Mis tratos",
+diff --git a/src/lib/empresas-cercanas.ts b/src/lib/empresas-cercanas.ts
+index 9541fab..b3814fe 100644
+--- a/src/lib/empresas-cercanas.ts
++++ b/src/lib/empresas-cercanas.ts
+@@ -3,18 +3,78 @@ export const LIMA_CENTRO: Coordenadas = { lat: -12.0464, lng: -77.0428 };
+ export const RADIOS = [5, 15, 30, "todos"] as const;
+ export type Radio = (typeof RADIOS)[number];
+ 
++/**
++ * Referencias aproximadas por distrito (punto central, no la dirección de la sede).
++ * Cubre los 43 distritos de Lima Metropolitana y los 7 del Callao que ofrece el registro.
++ * Las primeras seis entradas son las originales del proyecto; las demás son centroides
++ * aproximados: verifícalos antes de usarlos para algo más que una referencia visual.
++ */
+ const DISTRITOS: Record<string, Coordenadas> = {
++  // Originales del proyecto (no cambiar: las pruebas las fijan)
+   ate: { lat: -12.0267, lng: -76.9183 },
+   callao: { lat: -12.0566, lng: -77.1181 },
+   "villa el salvador": { lat: -12.2133, lng: -76.9378 },
+   "san juan de lurigancho": { lat: -12.0022, lng: -77.0075 },
+   "los olivos": { lat: -11.9761, lng: -77.0686 },
+-  cercado: { lat: -12.0480, lng: -77.0600 },
++  cercado: { lat: -12.048, lng: -77.06 },
++  // Lima Metropolitana
++  ancon: { lat: -11.7739, lng: -77.1744 },
++  barranco: { lat: -12.1403, lng: -77.0206 },
++  brena: { lat: -12.0586, lng: -77.0508 },
++  carabayllo: { lat: -11.8947, lng: -77.0372 },
++  chaclacayo: { lat: -11.9753, lng: -76.7681 },
++  chorrillos: { lat: -12.1676, lng: -77.0183 },
++  cieneguilla: { lat: -12.0897, lng: -76.7761 },
++  comas: { lat: -11.9411, lng: -77.0589 },
++  "el agustino": { lat: -12.0394, lng: -77.0094 },
++  independencia: { lat: -11.9917, lng: -77.0539 },
++  "jesus maria": { lat: -12.0711, lng: -77.0514 },
++  "la molina": { lat: -12.0803, lng: -76.9139 },
++  "la victoria": { lat: -12.0658, lng: -77.0147 },
++  lince: { lat: -12.0842, lng: -77.0344 },
++  "lurigancho-chosica": { lat: -11.9411, lng: -76.6992 },
++  lurin: { lat: -12.2753, lng: -76.8706 },
++  "magdalena del mar": { lat: -12.0894, lng: -77.0728 },
++  miraflores: { lat: -12.1219, lng: -77.0297 },
++  pachacamac: { lat: -12.23, lng: -76.86 },
++  pucusana: { lat: -12.4803, lng: -76.7967 },
++  "pueblo libre": { lat: -12.0733, lng: -77.0636 },
++  "puente piedra": { lat: -11.8572, lng: -77.0753 },
++  "punta hermosa": { lat: -12.3367, lng: -76.8208 },
++  "punta negra": { lat: -12.3639, lng: -76.7928 },
++  rimac: { lat: -12.0289, lng: -77.0436 },
++  "san bartolo": { lat: -12.3894, lng: -76.7803 },
++  "san borja": { lat: -12.1039, lng: -77.0 },
++  "san isidro": { lat: -12.0978, lng: -77.0369 },
++  "san juan de miraflores": { lat: -12.1544, lng: -76.9714 },
++  "san luis": { lat: -12.0775, lng: -76.9961 },
++  "san martin de porres": { lat: -12.0, lng: -77.0833 },
++  "san miguel": { lat: -12.0789, lng: -77.0825 },
++  "santa anita": { lat: -12.0436, lng: -76.9703 },
++  "santa maria del mar": { lat: -12.3994, lng: -76.7747 },
++  "santa rosa": { lat: -11.8044, lng: -77.1714 },
++  "santiago de surco": { lat: -12.1453, lng: -76.9917 },
++  surquillo: { lat: -12.1111, lng: -77.0136 },
++  "villa maria del triunfo": { lat: -12.1633, lng: -76.9347 },
++  // Provincia Constitucional del Callao (además de "callao")
++  bellavista: { lat: -12.0589, lng: -77.1264 },
++  "carmen de la legua-reynoso": { lat: -12.0425, lng: -77.0928 },
++  "la perla": { lat: -12.0703, lng: -77.1169 },
++  "la punta": { lat: -12.0722, lng: -77.1647 },
++  "mi peru": { lat: -11.8578, lng: -77.1189 },
++  ventanilla: { lat: -11.875, lng: -77.125 },
++};
++
++/** Nombres con los que el registro o los usuarios pueden escribir un distrito. */
++const ALIAS: Record<string, string> = {
++  "cercado de lima": "cercado",
++  "lima (cercado)": "cercado",
++  lima: "cercado",
+ };
+ 
+ export function coordenadasDistrito(distrito: string): Coordenadas | undefined {
+   const clave = distrito.trim().toLocaleLowerCase("es-PE").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+-  return DISTRITOS[clave === "cercado de lima" || clave === "lima" ? "cercado" : clave];
++  return DISTRITOS[ALIAS[clave] ?? clave];
+ }
+ 
+ export function distanciaKm(origen: Coordenadas, destino: Coordenadas): number {
+diff --git a/src/routes/_authenticated/panel/mapa.tsx b/src/routes/_authenticated/panel/mapa.tsx
+index b380ed6..e48f228 100644
+--- a/src/routes/_authenticated/panel/mapa.tsx
++++ b/src/routes/_authenticated/panel/mapa.tsx
+@@ -1,15 +1,39 @@
+-import { createFileRoute } from "@tanstack/react-router";
++import { useQuery } from "@tanstack/react-query";
++import { createFileRoute, Link } from "@tanstack/react-router";
+ 
+-import { MapaSimbiosis } from "@/components/mapa/MapaSimbiosis";
++import { MapaEmpresasCercanas } from "@/components/lotes/MapaEmpresasCercanas";
++import { Button } from "@/components/ui/button";
++import { mercadoQuery } from "@/lib/lotes";
+ 
+ export const Route = createFileRoute("/_authenticated/panel/mapa")({
+   head: () => ({ meta: [{ title: "Mapa · Remanente" }] }),
+-  component: () => (
++  component: MapaPage,
++});
++
++function MapaPage() {
++  const { data: lotes = [], isLoading, error } = useQuery(mercadoQuery);
++
++  return (
+     <div>
+-      <p role="note" className="mb-6 rounded-md bg-rose-pale px-5 py-4 text-sm text-foreground">
+-        Vista ilustrativa: los puntos son referenciales, no empresas registradas.
++      <h1 className="text-title text-primary-deep">Mapa</h1>
++      <p className="measure mt-2 text-muted-foreground">
++        Empresas que tienen lotes publicados en el mercado ahora mismo, ordenadas por cercanía. Es
++        una referencia por distrito, no la dirección exacta de la sede.
+       </p>
+-      <MapaSimbiosis />
++
++      {isLoading ? (
++        <p className="mt-8 text-muted-foreground">Cargando empresas…</p>
++      ) : error ? (
++        <p role="alert" className="mt-8 text-destructive">
++          No pudimos cargar el mapa. Inténtalo de nuevo.
++        </p>
++      ) : (
++        <MapaEmpresasCercanas lotes={lotes} />
++      )}
++
++      <Button variant="outline" className="mt-8" asChild>
++        <Link to="/panel/mercado">Ver el mercado</Link>
++      </Button>
+     </div>
+-  ),
+-});
++  );
++}
+diff --git a/src/routes/contacto.tsx b/src/routes/contacto.tsx
+index e70fa63..0bc0b47 100644
+--- a/src/routes/contacto.tsx
++++ b/src/routes/contacto.tsx
+@@ -1,7 +1,9 @@
+ import { createFileRoute, Link } from "@tanstack/react-router";
++import { Mail, MessageCircle } from "lucide-react";
+ 
+ import { SimplePage } from "@/components/site/SimplePage";
+ import { Button } from "@/components/ui/button";
++import { canalesContacto, CONTACTO_CONFIG } from "@/lib/contacto";
+ 
+ export const Route = createFileRoute("/contacto")({
+   head: () => ({
+@@ -14,21 +16,67 @@ export const Route = createFileRoute("/contacto")({
+       { name: "twitter:card", content: "summary" },
+     ],
+   }),
+-  component: () => (
++  component: Contacto,
++});
++
++function Contacto() {
++  const canales = canalesContacto(CONTACTO_CONFIG);
++  const horario = CONTACTO_CONFIG.horario.trim();
++
++  return (
+     <SimplePage
+       eyebrow="Contacto"
+       title="Conversemos"
+-      intro="Nuestros canales de contacto se publicarán muy pronto."
++      intro={
++        canales.length
++          ? "Escríbenos por el canal que prefieras: te responderá una persona del equipo."
++          : "Nuestros canales de contacto se publicarán muy pronto."
++      }
+     >
+       <div className="surface-card p-8">
+-        <p className="text-foreground">
+-          Mientras tanto, puedes registrar tu empresa y te avisaremos cuando el mercado esté
+-          disponible.
+-        </p>
+-        <Button className="mt-6" asChild>
+-          <Link to="/registro">Registrar empresa</Link>
+-        </Button>
++        {canales.length > 0 ? (
++          <>
++            <ul className="space-y-3">
++              {canales.map((canal) => (
++                <li key={canal.clave}>
++                  <a
++                    href={canal.href}
++                    {...(canal.clave === "whatsapp"
++                      ? { target: "_blank", rel: "noopener noreferrer" }
++                      : {})}
++                    className="inline-flex min-h-11 items-center gap-3 rounded-md text-primary-deep underline-offset-4 hover:text-primary hover:underline"
++                  >
++                    {canal.clave === "correo" ? (
++                      <Mail className="h-5 w-5 text-clay" strokeWidth={1.5} aria-hidden="true" />
++                    ) : (
++                      <MessageCircle
++                        className="h-5 w-5 text-clay"
++                        strokeWidth={1.5}
++                        aria-hidden="true"
++                      />
++                    )}
++                    <span>
++                      <span className="block text-[13px] text-clay">{canal.etiqueta}</span>
++                      {canal.valor}
++                    </span>
++                  </a>
++                </li>
++              ))}
++            </ul>
++            {horario && <p className="mt-6 text-sm text-muted-foreground">{horario}</p>}
++          </>
++        ) : (
++          <>
++            <p className="text-foreground">
++              Mientras tanto, puedes registrar tu empresa y te avisaremos cuando el mercado esté
++              disponible.
++            </p>
++            <Button className="mt-6" asChild>
++              <Link to="/registro">Registrar empresa</Link>
++            </Button>
++          </>
++        )}
+       </div>
+     </SimplePage>
+-  ),
+-});
++  );
++}
+diff --git a/src/routes/index.tsx b/src/routes/index.tsx
+index d962e85..2c55991 100644
+--- a/src/routes/index.tsx
++++ b/src/routes/index.tsx
+@@ -18,6 +18,7 @@ import { PasosInteractivos } from "@/components/site/PasosInteractivos";
+ import { ComoSeSostiene } from "@/components/site/ComoSeSostiene";
+ import { PorQueRemanente } from "@/components/site/PorQueRemanente";
+ import { Reveal } from "@/components/site/Reveal";
++import { useAuth } from "@/lib/auth";
+ import { formatNumero, impactoPublicoQuery } from "@/lib/impact";
+ 
+ export const Route = createFileRoute("/")({
+@@ -57,6 +58,7 @@ function Landing() {
+ }
+ 
+ function Hero() {
++  const { session } = useAuth();
+   const indicadores = [
+     { hash: "como-funciona", label: "Cómo funciona", activo: true },
+     { hash: "pasaporte", label: "Pasaporte y certificado", activo: false },
+@@ -92,7 +94,7 @@ function Hero() {
+             className="mt-8 w-full animate-rise px-6 [animation-delay:480ms] sm:w-auto"
+             asChild
+           >
+-            <Link to="/registro">
++            <Link to={session ? "/panel/analizar" : "/registro"}>
+               <Camera strokeWidth={1.5} />
+               Sube una foto de tu merma
+             </Link>
