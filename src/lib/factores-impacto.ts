@@ -8,7 +8,9 @@
  * Excepción: alfombra usa EPA WARM v16 (EE. UU., 2023): 2,40 t CO₂e por short ton = 2,65 kg por kg; sin dato de agua.
  * Excepción: textil usa 3,169 kg CO₂e por kg de ropa reutilizada en vez de incinerada (Comisión Europea, citada en Marinho Reis, Universidade do Minho,
  * https://repositorium.sdum.uminho.pt/handle/1822/91242). Es ropa usada, no retazos industriales; es una aproximación y no tiene dato de agua.
- * Son estimaciones de estudios extranjeros, no mediciones.
+ * Fuentes peruanas (MINAM): agua de cartón y papel = 26 000 L por tonelada reciclada (Ecoeficiencia en el trabajo, 2012);
+ * orgánicos = 180 kg CO₂e por tonelada compostada (presentación MINAM 2023, Comisión de Cambio Climático del Congreso).
+ * Son estimaciones, no mediciones; casi todas vienen de estudios extranjeros.
  * Los materiales que no figuran aquí no tienen un factor comparable y no suman CO₂e ni agua.
  */
 export type FactorMaterial = {
@@ -23,7 +25,7 @@ export type FactorMaterial = {
 };
 
 export const FACTORES: Readonly<Record<string, FactorMaterial>> = {
-  carton_papel: { co2e: 0.63, agua: 28.28, tipo: "directo", base: "Cartón y papel de embalaje" },
+  carton_papel: { co2e: 0.63, agua: 26, tipo: "directo", base: "Cartón y papel de embalaje (CO₂e: NSW; agua: MINAM, Perú)" },
   madera: { co2e: 1.35, agua: 0, tipo: "directo", base: "Tarimas y embalajes de madera" },
   vidrio_envases: { co2e: 0.62, agua: 2.44, tipo: "directo", base: "Envases de vidrio" },
   metal_limpio: { co2e: 0.44, agua: 0, tipo: "aproximado", base: "Acero (el más bajo de los metales)" },
@@ -31,6 +33,7 @@ export const FACTORES: Readonly<Record<string, FactorMaterial>> = {
   tapas_preformas: { co2e: 1.18, agua: 0, tipo: "aproximado", base: "PET" },
   flejes: { co2e: 1.08, agua: 0, tipo: "aproximado", base: "HDPE (el más bajo de los plásticos)" },
   carretes_conos: { co2e: 0.63, agua: 0, tipo: "aproximado", base: "Cartón (el más bajo entre cartón y madera)" },
+  organicos_secos: { co2e: 0.18, agua: 0, tipo: "aproximado", base: "Compostaje de residuos orgánicos, MINAM (Perú), sin dato de agua" },
   textil: { co2e: 3.17, agua: 0, tipo: "aproximado", base: "Ropa reutilizada vs incinerada, Comisión Europea (sin dato de agua)" },
   alfombra_tapizado: { co2e: 2.65, agua: 0, tipo: "aproximado", base: "Alfombra, EPA WARM v16 (sin dato de agua)" },
 };

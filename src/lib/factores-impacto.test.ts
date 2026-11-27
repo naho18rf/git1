@@ -7,7 +7,7 @@ describe("calcularImpacto", () => {
   it("multiplica kg por el factor del material", () => {
     const r = calcularImpacto([{ categoria: "carton_papel", kg: 100 }]);
     expect(r.co2e).toBeCloseTo(63, 5);
-    expect(r.agua).toBeCloseTo(2828, 5);
+    expect(r.agua).toBeCloseTo(2600, 5);
     expect(r.kgConFactor).toBe(100);
     expect(r.kgSinFactor).toBe(0);
   });
